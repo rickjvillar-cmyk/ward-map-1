@@ -234,6 +234,46 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .change-status-link { color: #7c4a2c; }
 .card-status-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; margin-top: 4px; }
 
+/* ── Edit Contact Menu ── */
+#edit-menu {
+  position: fixed; z-index: 3000;
+  background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
+  padding: 6px; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: none; min-width: 190px;
+}
+.edit-menu-title { padding: 8px 14px 6px; font-size: 11px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+.edit-menu-item { padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 9px; color: #111; }
+.edit-menu-item:hover { background: #f5f4f0; }
+.edit-menu-item.danger { color: #c0392b; }
+.edit-menu-item.danger:hover { background: #fff5f5; }
+.edit-menu-sep { height: 1px; background: #f0efe9; margin: 4px 0; }
+#edit-menu-backdrop { position: fixed; inset: 0; z-index: 2999; display: none; }
+
+/* Edit modal */
+#edit-modal {
+  position: fixed; inset: 0; z-index: 4000;
+  background: rgba(0,0,0,0.4); display: none;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#edit-modal.open { display: flex; }
+.edit-modal-card {
+  background: #fff; border-radius: 14px; padding: 24px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+.edit-modal-title { font-size: 16px; font-weight: 600; color: #111; margin-bottom: 16px; }
+.edit-modal-field { margin-bottom: 14px; }
+.edit-modal-field label { display: block; font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.edit-modal-field input, .edit-modal-field select {
+  width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 14px; font-family: inherit; color: #111; background: #fafaf8; outline: none;
+}
+.edit-modal-field input:focus, .edit-modal-field select:focus { border-color: #4a7c5e; background: #fff; }
+.edit-modal-btns { display: flex; gap: 10px; margin-top: 18px; }
+.edit-modal-save { flex: 1; padding: 11px; background: #2c5f3e; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.edit-modal-save:hover { background: #1e4a2e; }
+.edit-modal-cancel { padding: 11px 18px; background: #f5f4f0; color: #555; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; cursor: pointer; }
+
 /* Save toast */
 #save-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #1a1a1a; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2); white-space: nowrap; }
 #save-toast.show { display: block; }
@@ -302,6 +342,22 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 <!-- Status context menu (mobile long-press) -->
 <div id="status-menu-backdrop" onclick="closeStatusMenu()"></div>
 <div id="status-menu"></div>
+
+<!-- Edit Contact Menu -->
+<div id="edit-menu-backdrop" onclick="closeEditMenu()"></div>
+<div id="edit-menu"></div>
+
+<!-- Edit Modal -->
+<div id="edit-modal">
+  <div class="edit-modal-card">
+    <div class="edit-modal-title" id="edit-modal-title">Edit</div>
+    <div id="edit-modal-body"></div>
+    <div class="edit-modal-btns">
+      <button class="edit-modal-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-modal-save" id="edit-modal-save" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- App -->
 <div id="app">
@@ -594,10 +650,12 @@ async function fetchData(){
       visible:visibleStatuses.has(label)&&(visibleDistricts.has(district||'')||!district)
     });
     marker.addListener('click',()=>{
-      infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:160px">
+      const pidx=allPeople.findIndex(x=>x.name===name&&x.fullAddr===fullAddr);
+      infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:190px">
         <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(name)}</div>
         <div style="display:inline-block;background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px">${esc(label)}</div>
-        <div style="font-size:12px;color:#666;line-height:1.5">${esc(fullAddr)}</div>
+        <div style="font-size:12px;color:#666;line-height:1.5;margin-bottom:8px">${esc(fullAddr)}</div>
+        <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="width:100%;padding:7px;background:#2c5f3e;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">✎ Edit contact</button>
       </div>`);
       infoWindow.open(map,marker);
     });
@@ -710,57 +768,21 @@ function applyVisibility(){
 async function updatePersonStatus(person, newLabel){
   const oldLabel=person.label;
   if(oldLabel===newLabel)return;
-  // Optimistic update
   person.label=newLabel;
   person.color=STAT_COLORS[newLabel]||'#111111';
-  // Update marker pin color
   const idx=allPeople.indexOf(person);
   const marker=markers[idx];
   if(marker){
     marker.setIcon({url:makePinSvg(person.color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)});
     marker.setVisible(visibleStatuses.has(newLabel));
   }
-  showToast('Saving…');
-  try{
-    // Use JSONP GET — works from file:// and avoids CORS issues with Apps Script
-    const result = await new Promise((resolve, reject) => {
-      const cbName = '__wardmap_update_' + Date.now();
-      const url = currentScriptUrl
-        + '?action=update'
-        + '&row=' + person.rowIndex
-        + '&col=' + statusColIndex
-        + '&value=' + encodeURIComponent(newLabel)
-        + '&callback=' + cbName;
-      const timeout = setTimeout(() => {
-        delete window[cbName]; script.remove();
-        reject(new Error('Timeout'));
-      }, 10000);
-      window[cbName] = (data) => {
-        clearTimeout(timeout); delete window[cbName]; script.remove();
-        resolve(data);
-      };
-      const script = document.createElement('script');
-      script.src = url;
-      script.onerror = () => { clearTimeout(timeout); delete window[cbName]; reject(new Error('Script error')); };
-      document.head.appendChild(script);
-    });
-    if(result.success){
-      showToast('✅ Saved!');
-      renderBoard(allPeople);
-    } else {
-      throw new Error('Script returned error');
-    }
-  }catch(e){
-    // Revert
-    person.label=oldLabel;
-    person.color=STAT_COLORS[oldLabel]||'#111111';
-    if(marker){
-      marker.setIcon({url:makePinSvg(person.color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)});
-      marker.setVisible(visibleStatuses.has(oldLabel));
-    }
+  await updateSheetCell(person.rowIndex, statusColIndex, newLabel, ()=>{
+    showToast('✅ Status updated!');
     renderBoard(allPeople);
-    showToast('❌ Save failed — check your Apps Script',true);
-  }
+  });
+  // On fail, revert is handled inside updateSheetCell via toast only
+  // Re-render regardless
+  renderBoard(allPeople);
 }
 
 // ── Board with drag-and-drop ──
@@ -823,17 +845,17 @@ function renderBoard(people){
         <div class="person-addr">${esc(p.fullAddr)}</div>
         <div class="card-actions">
           ${p.latLng?`<span class="card-action-link view-map-link">↗ View on map</span>`:''}
-          <span class="card-action-link change-status-link">✎ Change status</span>
+          <span class="card-action-link edit-contact-link">✎ Edit contact</span>
         </div>`;
 
       // Wire up action links after innerHTML is set
       const viewLink=card.querySelector('.view-map-link');
-      const statusLink=card.querySelector('.change-status-link');
+      const editLink=card.querySelector('.edit-contact-link');
       if(viewLink) viewLink.addEventListener('click',e=>{e.stopPropagation();focusOnMap(p.name);});
-      if(statusLink) statusLink.addEventListener('click',e=>{
+      if(editLink) editLink.addEventListener('click',e=>{
         e.stopPropagation();
-        const rect=statusLink.getBoundingClientRect();
-        showStatusMenu(p,rect.left,rect.top);
+        const rect=editLink.getBoundingClientRect();
+        showEditMenu(p,rect.left,rect.bottom+4);
       });
 
       // Desktop drag
@@ -844,12 +866,12 @@ function renderBoard(people){
       });
       card.addEventListener('dragend',()=>card.classList.remove('dragging'));
 
-      // Mobile: long press → status menu
+      // Mobile: long press → edit menu
       let pressTimer=null;
       card.addEventListener('touchstart',e=>{
         pressTimer=setTimeout(()=>{
           pressTimer=null;
-          showStatusMenu(p,e.touches[0].clientX,e.touches[0].clientY);
+          showEditMenu(p,e.touches[0].clientX,e.touches[0].clientY);
         },500);
       },{passive:true});
       card.addEventListener('touchend',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
@@ -860,31 +882,177 @@ function renderBoard(people){
   });
 }
 
-// ── Mobile status menu (long press) ──
-function showStatusMenu(person,x,y){
-  const menu=document.getElementById('status-menu');
-  const backdrop=document.getElementById('status-menu-backdrop');
-  menu.innerHTML=`<div style="font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:6px 14px 8px">Move "${esc(person.name)}" to…</div>`;
-  BOARD_ORDER.forEach(label=>{
-    if(label===person.label)return;
-    const item=document.createElement('div');
-    item.className='status-menu-item';
-    item.innerHTML=`<div class="smi-dot" style="background:${STAT_COLORS[label]||'#111111'}"></div>${esc(label)}`;
-    item.onclick=async()=>{closeStatusMenu();await updatePersonStatus(person,label);};
-    menu.appendChild(item);
+// ── Edit Contact Menu ──
+let currentEditPerson = null;
+let currentEditMode = null;
+
+function showEditMenu(person, x, y){
+  currentEditPerson = person;
+  const menu = document.getElementById('edit-menu');
+  const backdrop = document.getElementById('edit-menu-backdrop');
+  menu.innerHTML = `
+    <div class="edit-menu-title">✎ Edit "${esc(person.name)}"</div>
+    <div class="edit-menu-sep"></div>
+    <div class="edit-menu-item" onclick="openEditModal('status')">🔄 Change status</div>
+    <div class="edit-menu-item" onclick="openEditModal('name')">👤 Edit name</div>
+    <div class="edit-menu-item" onclick="openEditModal('address')">📍 Edit address</div>
+    <div class="edit-menu-sep"></div>
+    <div class="edit-menu-item danger" onclick="openEditModal('delete')">🗑 Delete record</div>`;
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const mw=210, mh=220;
+  menu.style.left = Math.min(x, vw-mw-12)+'px';
+  menu.style.top  = Math.min(y, vh-mh-12)+'px';
+  menu.style.display = 'block';
+  backdrop.style.display = 'block';
+}
+
+function showEditMenuFromMap(idx){
+  infoWindow.close();
+  const person = allPeople[idx];
+  if(!person) return;
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  showEditMenu(person, cx-105, cy-110);
+}
+
+function closeEditMenu(){
+  document.getElementById('edit-menu').style.display='none';
+  document.getElementById('edit-menu-backdrop').style.display='none';
+}
+
+function openEditModal(mode){
+  closeEditMenu();
+  currentEditMode = mode;
+  const p = currentEditPerson;
+  const modal = document.getElementById('edit-modal');
+  const title = document.getElementById('edit-modal-title');
+  const body  = document.getElementById('edit-modal-body');
+  const saveBtn = document.getElementById('edit-modal-save');
+
+  if(mode === 'status'){
+    title.textContent = 'Change Status';
+    body.innerHTML = `
+      <div class="edit-modal-field">
+        <label>Status</label>
+        <select id="em-status">
+          ${BOARD_ORDER.map(l=>`<option value="${l}" ${l===p.label?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>`;
+    saveBtn.textContent = 'Save';
+    saveBtn.style.background = '#2c5f3e';
+  } else if(mode === 'name'){
+    title.textContent = 'Edit Name';
+    body.innerHTML = `
+      <div class="edit-modal-field">
+        <label>Name</label>
+        <input type="text" id="em-name" value="${esc(p.name)}"/>
+      </div>`;
+    saveBtn.textContent = 'Save';
+    saveBtn.style.background = '#2c5f3e';
+  } else if(mode === 'address'){
+    title.textContent = 'Edit Address';
+    body.innerHTML = `
+      <div class="edit-modal-field">
+        <label>Full Address</label>
+        <input type="text" id="em-address" value="${esc(p.fullAddr)}"/>
+      </div>`;
+    saveBtn.textContent = 'Save';
+    saveBtn.style.background = '#2c5f3e';
+  } else if(mode === 'delete'){
+    title.textContent = 'Delete Record';
+    body.innerHTML = `<p style="font-size:13px;color:#555;line-height:1.6">Are you sure you want to delete <strong>${esc(p.name)}</strong>?<br>This will remove the entire row from your Google Sheet.</p>`;
+    saveBtn.textContent = 'Delete';
+    saveBtn.style.background = '#c0392b';
+  }
+  modal.classList.add('open');
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').classList.remove('open');
+  currentEditMode = null;
+}
+
+async function saveEdit(){
+  const p = currentEditPerson;
+  if(!p || !currentEditMode) return;
+
+  if(currentEditMode === 'status'){
+    const newLabel = document.getElementById('em-status').value;
+    closeEditModal();
+    await updatePersonStatus(p, newLabel);
+
+  } else if(currentEditMode === 'name'){
+    const newName = document.getElementById('em-name').value.trim();
+    if(!newName){ showToast('Name cannot be empty', true); return; }
+    closeEditModal();
+    const nameColIndex = 1; // column A = 1
+    await updateSheetCell(p.rowIndex, nameColIndex, newName, ()=>{
+      p.name = newName;
+      const m = markers[allPeople.indexOf(p)];
+      if(m) m.setTitle(newName);
+      renderBoard(allPeople);
+      showToast('✅ Name updated!');
+    });
+
+  } else if(currentEditMode === 'address'){
+    const newAddr = document.getElementById('em-address').value.trim();
+    if(!newAddr){ showToast('Address cannot be empty', true); return; }
+    closeEditModal();
+    const addrColIndex = 2; // column B = 2
+    await updateSheetCell(p.rowIndex, addrColIndex, newAddr, ()=>{
+      p.fullAddr = newAddr;
+      renderBoard(allPeople);
+      showToast('✅ Address updated! Refresh to re-geocode.');
+    });
+
+  } else if(currentEditMode === 'delete'){
+    closeEditModal();
+    await deleteSheetRow(p);
+  }
+}
+
+// ── Sheet update helpers ──
+function updateSheetCell(row, col, value, onSuccess){
+  return new Promise((resolve)=>{
+    showToast('Saving…');
+    const cbName='__wardmap_update_'+Date.now();
+    const url=currentScriptUrl+'?action=update&row='+row+'&col='+col+'&value='+encodeURIComponent(value)+'&callback='+cbName;
+    const timeout=setTimeout(()=>{delete window[cbName];script.remove();showToast('❌ Save failed',true);resolve();},10000);
+    window[cbName]=(data)=>{clearTimeout(timeout);delete window[cbName];script.remove();if(data.success){onSuccess();}else{showToast('❌ Save failed',true);}resolve();};
+    const script=document.createElement('script');
+    script.src=url;
+    script.onerror=()=>{clearTimeout(timeout);delete window[cbName];showToast('❌ Save failed',true);resolve();};
+    document.head.appendChild(script);
   });
-  // Position menu
-  const vw=window.innerWidth,vh=window.innerHeight;
-  const mw=200,mh=180;
-  let left=Math.min(x,vw-mw-12);
-  let top=Math.min(y,vh-mh-12);
-  menu.style.left=left+'px';menu.style.top=top+'px';
-  menu.style.display='block';backdrop.style.display='block';
 }
-function closeStatusMenu(){
-  document.getElementById('status-menu').style.display='none';
-  document.getElementById('status-menu-backdrop').style.display='none';
+
+async function deleteSheetRow(p){
+  showToast('Deleting…');
+  const cbName='__wardmap_delete_'+Date.now();
+  const url=currentScriptUrl+'?action=delete&row='+p.rowIndex+'&callback='+cbName;
+  const result=await new Promise((resolve)=>{
+    const timeout=setTimeout(()=>{delete window[cbName];script.remove();resolve({success:false});},10000);
+    window[cbName]=(data)=>{clearTimeout(timeout);delete window[cbName];script.remove();resolve(data);};
+    const script=document.createElement('script');
+    script.src=url;
+    script.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve({success:false});};
+    document.head.appendChild(script);
+  });
+  if(result.success){
+    const idx=allPeople.indexOf(p);
+    if(idx>=0){
+      const m=markers[idx];
+      if(m)m.setMap(null);
+      markers.splice(idx,1);
+      allPeople.splice(idx,1);
+    }
+    renderBoard(allPeople);
+    showToast('✅ Record deleted!');
+  } else {
+    showToast('❌ Delete failed — check your Apps Script',true);
+  }
 }
+
+// ── Mobile: long press still opens edit menu ──
 
 function toggleCol(cardsId,toggleEl){
   if(window.innerWidth>=640)return;
