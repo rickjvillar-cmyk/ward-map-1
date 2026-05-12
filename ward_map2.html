@@ -96,6 +96,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
   min-width: 150px;
 }
+/* On desktop: pull out of flow so it floats over the map */
+@media (min-width: 640px) {
+  #filter-panel { position: absolute; }
+}
 @media (max-width: 639px) {
   #filter-panel {
     position: relative !important; top: auto !important; right: auto !important;
@@ -106,8 +110,13 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     gap: 0; flex-shrink: 0; width: 100%;
     background: #fff; border-bottom: 1px solid #e2e0d8;
     overflow-x: auto; -webkit-overflow-scrolling: touch;
-    order: -1;
+    order: 2;
   }
+  #topbar { order: 1; }
+  #mobile-stats { order: 3; }
+  #search-bar-area { order: 4; }
+  #content { order: 5; }
+  #bottom-nav { order: 6; }
   #filter-panel .fp-title { display: none; }
   .filter-row { margin-bottom: 0; margin-right: 16px; flex-shrink: 0; }
   .filter-row:last-child { margin-right: 0; }
@@ -271,13 +280,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn{display:none!important;}}</style>
     </div>
   </div>
-  <div id="mobile-stats"></div>
-  <div id="search-bar-area">
-    <div id="board-search-wrap">
-      <input type="text" id="board-search" placeholder="Search by name or address…" oninput="filterBoard(this.value)"/>
-    </div>
-  </div>
-  <!-- Filter panel — inside map on desktop, horizontal bar on mobile -->
+  <!-- Filter panel — horizontal bar on mobile, absolute on desktop -->
   <div id="filter-panel">
     <div class="fp-title">Show / Hide</div>
     <div class="filter-row" onclick="toggleFilter('Active')">
@@ -295,6 +298,12 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
       <div class="filter-cb checked" id="fcb-Don't Know" style="background:#546e7a"></div>
       <div class="filter-label">Don't Know</div>
+    </div>
+  </div>
+  <div id="mobile-stats"></div>
+  <div id="search-bar-area">
+    <div id="board-search-wrap">
+      <input type="text" id="board-search" placeholder="Search by name or address…" oninput="filterBoard(this.value)"/>
     </div>
   </div>
   <div id="content">
