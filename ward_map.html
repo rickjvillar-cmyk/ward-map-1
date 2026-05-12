@@ -164,7 +164,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .fcb-green.checked  { background: #2e7d32 !important; }
 .fcb-red.checked    { background: #c62828 !important; }
 .fcb-yellow.checked { background: #e6c800 !important; }
-.fcb-grey.checked   { background: #546e7a !important; }
+.fcb-grey.checked   { background: #111111 !important; }
 .dcb-blue.checked   { background: #3a6fa8 !important; }
 .filter-label { font-size: 12px; color: #333; display: flex; align-items: center; gap: 6px; }
 .filter-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
@@ -402,17 +402,17 @@ const STATUS_CONFIG=[
   {key:'active',      label:'Active',      color:'#2e7d32'},
   {key:'inactive',    label:'Inactive',    color:'#c62828'},
   {key:'less active', label:'Less Active', color:'#e6c800'},
-  {key:"don't know",  label:"Don't Know",  color:'#546e7a'},
-  {key:'dont know',   label:"Don't Know",  color:'#546e7a'},
-  {key:'unknown',     label:"Don't Know",  color:'#546e7a'},
+  {key:"don't know",  label:"Don't Know",  color:'#111111'},
+  {key:'dont know',   label:"Don't Know",  color:'#111111'},
+  {key:'unknown',     label:"Don't Know",  color:'#111111'},
 ];
 const BOARD_ORDER=['Active','Inactive','Less Active',"Don't Know"];
-const STAT_COLORS={'Active':'#2e7d32','Inactive':'#c62828','Less Active':'#e6c800',"Don't Know":'#546e7a'};
+const STAT_COLORS={'Active':'#2e7d32','Inactive':'#c62828','Less Active':'#e6c800',"Don't Know":'#111111'};
 
 function getStatusConfig(s){
-  if(!s)return{label:"Don't Know",color:'#546e7a'};
+  if(!s)return{label:"Don't Know",color:'#111111'};
   const k=s.trim().toLowerCase();
-  return STATUS_CONFIG.find(x=>x.key===k)||{label:s,color:'#546e7a'};
+  return STATUS_CONFIG.find(x=>x.key===k)||{label:s,color:'#111111'};
 }
 
 let map,geocoder,markers=[],infoWindow,drawingManager,currentPolygon;
@@ -636,8 +636,8 @@ async function fetchData(){
   if(geocodedSoFar>0)saveCache(cache);
   if(markers.filter(Boolean).length>0)map.fitBounds(bounds);
   const statHtml=Object.entries(stats).map(([label,count])=>
-    `<div class="stat-pill" style="background:${(STAT_COLORS[label]||'#546e7a')}18;color:${STAT_COLORS[label]||'#546e7a'}">
-      <div class="stat-dot" style="background:${STAT_COLORS[label]||'#546e7a'}"></div>${count} ${label}
+    `<div class="stat-pill" style="background:${(STAT_COLORS[label]||'#111111')}18;color:${STAT_COLORS[label]||'#111111'}">
+      <div class="stat-dot" style="background:${STAT_COLORS[label]||'#111111'}"></div>${count} ${label}
     </div>`).join('');
   document.getElementById('stats').innerHTML=statHtml;
   document.getElementById('mobile-stats').innerHTML=statHtml;
@@ -694,7 +694,7 @@ async function updatePersonStatus(person, newLabel){
   if(oldLabel===newLabel)return;
   // Optimistic update
   person.label=newLabel;
-  person.color=STAT_COLORS[newLabel]||'#546e7a';
+  person.color=STAT_COLORS[newLabel]||'#111111';
   // Update marker pin color
   const idx=allPeople.indexOf(person);
   const marker=markers[idx];
@@ -735,7 +735,7 @@ async function updatePersonStatus(person, newLabel){
   }catch(e){
     // Revert
     person.label=oldLabel;
-    person.color=STAT_COLORS[oldLabel]||'#546e7a';
+    person.color=STAT_COLORS[oldLabel]||'#111111';
     if(marker){
       marker.setIcon({url:makePinSvg(person.color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)});
       marker.setVisible(visibleStatuses.has(oldLabel));
@@ -754,7 +754,7 @@ function renderBoard(people){
   people.forEach(p=>{const key=BOARD_ORDER.includes(p.label)?p.label:"Don't Know";groups[key].push(p);});
 
   BOARD_ORDER.forEach(label=>{
-    const items=groups[label]||[],color=STAT_COLORS[label]||'#546e7a';
+    const items=groups[label]||[],color=STAT_COLORS[label]||'#111111';
     const col=document.createElement('div');
     col.className='board-col';
     col.dataset.label=label;
@@ -851,7 +851,7 @@ function showStatusMenu(person,x,y){
     if(label===person.label)return;
     const item=document.createElement('div');
     item.className='status-menu-item';
-    item.innerHTML=`<div class="smi-dot" style="background:${STAT_COLORS[label]||'#546e7a'}"></div>${esc(label)}`;
+    item.innerHTML=`<div class="smi-dot" style="background:${STAT_COLORS[label]||'#111111'}"></div>${esc(label)}`;
     item.onclick=async()=>{closeStatusMenu();await updatePersonStatus(person,label);};
     menu.appendChild(item);
   });
