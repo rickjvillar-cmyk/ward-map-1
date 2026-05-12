@@ -122,15 +122,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   .filter-row:last-child { margin-right: 0; }
 }
 #filter-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
-#district-panel {
-  display: none;
-  position: absolute; top: 230px; right: 12px; z-index: 6;
-  background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
-  padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
-  min-width: 150px;
-}
-@media (min-width: 640px) { #district-panel { display: block; } }
-#district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
+
 #district-panel {
   display: none; /* hidden on mobile */
   position: absolute; top: 230px; right: 12px; z-index: 6;
@@ -142,9 +134,9 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 #district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
 .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; cursor: pointer; user-select: none; }
 .filter-row:last-child { margin-bottom: 0; }
-.filter-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 10px; font-weight: 700; color: #fff; }
-.filter-cb.checked { border-color: transparent; }
-.filter-cb.unchecked { background: #eee !important; border-color: #ddd !important; }
+.filter-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ccc; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 10px; font-weight: 700; color: transparent; }
+.filter-cb.checked { background: #3a6fa8 !important; border-color: #3a6fa8 !important; color: #fff !important; }
+.filter-cb.unchecked { background: #fff !important; border-color: #ccc !important; color: transparent !important; }
 .filter-label { font-size: 12px; color: #333; display: flex; align-items: center; gap: 6px; }
 .filter-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
@@ -302,19 +294,19 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   <div id="filter-panel">
     <div class="fp-title">Show / Hide</div>
     <div class="filter-row" onclick="toggleFilter('Active')">
-      <div class="filter-cb checked" id="fcb-Active" style="background:#2e7d32"></div>
+      <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
       <div class="filter-label">Active</div>
     </div>
     <div class="filter-row" onclick="toggleFilter('Inactive')">
-      <div class="filter-cb checked" id="fcb-Inactive" style="background:#c62828"></div>
+      <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
       <div class="filter-label">Inactive</div>
     </div>
     <div class="filter-row" onclick="toggleFilter('Less Active')">
-      <div class="filter-cb checked" id="fcb-Less Active" style="background:#e6c800"></div>
+      <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
       <div class="filter-label">Less Active</div>
     </div>
     <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
-      <div class="filter-cb checked" id="fcb-Don't Know" style="background:#546e7a"></div>
+      <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
       <div class="filter-label">Don't Know</div>
     </div>
   </div>
@@ -325,18 +317,9 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     </div>
   </div>
   <!-- District filter — desktop only -->
-  <div id="district-panel">
-    <div class="fp-title">Districts</div>
-    <div class="filter-row" onclick="toggleDistrict('District 1')">
-      <div class="filter-cb checked" id="dcb-District_1" style="background:#3a6fa8"></div>
-      <div class="filter-label">District 1</div>
-    </div>
-    <div class="filter-row" onclick="toggleDistrict('District 2')">
-      <div class="filter-cb checked" id="dcb-District_2" style="background:#3a6fa8"></div>
-      <div class="filter-label">District 2</div>
     </div>
     <div class="filter-row" onclick="toggleDistrict('District 3')">
-      <div class="filter-cb checked" id="dcb-District_3" style="background:#3a6fa8"></div>
+      <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
       <div class="filter-label">District 3</div>
     </div>
   </div>
@@ -344,15 +327,15 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   <div id="district-panel">
     <div class="fp-title">Districts</div>
     <div class="filter-row" onclick="toggleDistrict('District 1')">
-      <div class="filter-cb checked" id="dcb-District_1" style="background:#3a6fa8"></div>
+      <div class="filter-cb checked dcb-blue" id="dcb-District_1">✓</div>
       <div class="filter-label">District 1</div>
     </div>
     <div class="filter-row" onclick="toggleDistrict('District 2')">
-      <div class="filter-cb checked" id="dcb-District_2" style="background:#3a6fa8"></div>
+      <div class="filter-cb checked dcb-blue" id="dcb-District_2">✓</div>
       <div class="filter-label">District 2</div>
     </div>
     <div class="filter-row" onclick="toggleDistrict('District 3')">
-      <div class="filter-cb checked" id="dcb-District_3" style="background:#3a6fa8"></div>
+      <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
       <div class="filter-label">District 3</div>
     </div>
   </div>
