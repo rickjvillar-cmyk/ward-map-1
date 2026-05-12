@@ -91,14 +91,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 /* ── Status filter panel ── */
 #filter-panel {
-  position: absolute; top: 64px; right: 12px; z-index: 6;
+  position: absolute; top: 12px; right: 12px; z-index: 6;
   background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
   padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
   min-width: 150px;
-}
-/* On desktop: pull out of flow so it floats over the map */
-@media (min-width: 640px) {
-  #filter-panel { position: absolute; }
 }
 @media (max-width: 639px) {
   #filter-panel {
@@ -124,8 +120,8 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 #filter-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
 
 #district-panel {
-  display: none; /* hidden on mobile */
-  position: absolute; top: 230px; right: 12px; z-index: 6;
+  display: none;
+  position: absolute; top: 170px; right: 12px; z-index: 6;
   background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
   padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
   min-width: 150px;
@@ -290,26 +286,6 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn{display:none!important;}}</style>
     </div>
   </div>
-  <!-- Filter panel — horizontal bar on mobile, absolute on desktop -->
-  <div id="filter-panel">
-    <div class="fp-title">Show / Hide</div>
-    <div class="filter-row" onclick="toggleFilter('Active')">
-      <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
-      <div class="filter-label">Active</div>
-    </div>
-    <div class="filter-row" onclick="toggleFilter('Inactive')">
-      <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
-      <div class="filter-label">Inactive</div>
-    </div>
-    <div class="filter-row" onclick="toggleFilter('Less Active')">
-      <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
-      <div class="filter-label">Less Active</div>
-    </div>
-    <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
-      <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
-      <div class="filter-label">Don't Know</div>
-    </div>
-  </div>
   <div id="mobile-stats"></div>
   <div id="search-bar-area">
     <div id="board-search-wrap">
@@ -323,25 +299,45 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <div class="filter-label">District 3</div>
     </div>
   </div>
-  <!-- District filter — desktop only -->
-  <div id="district-panel">
-    <div class="fp-title">Districts</div>
-    <div class="filter-row" onclick="toggleDistrict('District 1')">
-      <div class="filter-cb checked dcb-blue" id="dcb-District_1">✓</div>
-      <div class="filter-label">District 1</div>
-    </div>
-    <div class="filter-row" onclick="toggleDistrict('District 2')">
-      <div class="filter-cb checked dcb-blue" id="dcb-District_2">✓</div>
-      <div class="filter-label">District 2</div>
-    </div>
-    <div class="filter-row" onclick="toggleDistrict('District 3')">
-      <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
-      <div class="filter-label">District 3</div>
-    </div>
-  </div>
   <div id="content">
     <div id="map-view">
       <div id="map"></div>
+      <!-- Status filter -->
+      <div id="filter-panel">
+        <div class="fp-title">Show / Hide</div>
+        <div class="filter-row" onclick="toggleFilter('Active')">
+          <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
+          <div class="filter-label">Active</div>
+        </div>
+        <div class="filter-row" onclick="toggleFilter('Inactive')">
+          <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
+          <div class="filter-label">Inactive</div>
+        </div>
+        <div class="filter-row" onclick="toggleFilter('Less Active')">
+          <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
+          <div class="filter-label">Less Active</div>
+        </div>
+        <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
+          <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
+          <div class="filter-label">Don't Know</div>
+        </div>
+      </div>
+      <!-- District filter — desktop only, below status filter -->
+      <div id="district-panel">
+        <div class="fp-title">Districts</div>
+        <div class="filter-row" onclick="toggleDistrict('District 1')">
+          <div class="filter-cb checked dcb-blue" id="dcb-District_1">✓</div>
+          <div class="filter-label">District 1</div>
+        </div>
+        <div class="filter-row" onclick="toggleDistrict('District 2')">
+          <div class="filter-cb checked dcb-blue" id="dcb-District_2">✓</div>
+          <div class="filter-label">District 2</div>
+        </div>
+        <div class="filter-row" onclick="toggleDistrict('District 3')">
+          <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
+          <div class="filter-label">District 3</div>
+        </div>
+      </div>
 
       <div id="lasso-hint">✏️ Click/tap points · Double-click to close</div>
       <div id="selection-panel">
@@ -596,7 +592,7 @@ async function fetchData(){
       const marker=new google.maps.Marker({
         position:displayPos,map,title:name,
         icon:{url:makePinSvg(color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)},
-        visible:visibleStatuses.has(label)&&visibleDistricts.has(p.district||'')
+        visible:visibleStatuses.has(label)&&(visibleDistricts.has(p.district||'')||!p.district)
       });
       marker.addListener('click',()=>{
         infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:160px">
@@ -676,7 +672,7 @@ function applyVisibility(){
   allPeople.forEach((p,i)=>{
     const m=markers[i];
     const districtKey=p.district||'';
-    if(m)m.setVisible(visibleStatuses.has(p.label)&&visibleDistricts.has(districtKey));
+    if(m)m.setVisible(visibleStatuses.has(p.label)&&(visibleDistricts.has(districtKey)||!districtKey));
   });
 }
 
@@ -902,7 +898,7 @@ function computeSelection(polygon){
   // Only select pins that are currently visible (match active filters)
   selectedPeople=allPeople.filter(p=>{
     const dk=p.district||'';
-    return p.latLng&&visibleStatuses.has(p.label)&&visibleDistricts.has(dk)&&google.maps.geometry.poly.containsLocation(p.latLng,polygon);
+    return p.latLng&&visibleStatuses.has(p.label)&&(visibleDistricts.has(dk)||!dk)&&google.maps.geometry.poly.containsLocation(p.latLng,polygon);
   });
   renderSelectionPanel();
 }
