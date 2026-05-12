@@ -640,19 +640,6 @@ function toggleFilter(label){
 }
 
 function toggleDistrict(label){
-  if(visibleDistricts.has(label)){
-    visibleDistricts.delete(label);
-    const cb=document.getElementById('dcb-'+label.replace(/ /g,'_'));
-    if(cb){cb.classList.remove('checked');cb.style.background='#eee';cb.style.borderColor='#ddd';}
-  } else {
-    visibleDistricts.add(label);
-    const cb=document.getElementById('dcb-'+label.replace(/ /g,'_'));
-    if(cb){cb.classList.add('checked');cb.style.background='#3a6fa8';cb.style.borderColor='transparent';}
-  }
-  applyVisibility();
-}
-
-function toggleDistrict(label){
   const key=label.replace(/ /g,'_');
   if(visibleDistricts.has(label)){
     visibleDistricts.delete(label);
