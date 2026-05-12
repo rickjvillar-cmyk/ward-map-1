@@ -359,6 +359,66 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   </div>
 </div>
 
+<!-- Add Record Modal -->
+<div id="add-modal" style="position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:14px;padding:24px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,0.2);margin:auto;">
+    <div style="font-size:17px;font-weight:600;color:#111;margin-bottom:18px;">➕ Add New Record</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Name *</label>
+        <input id="add-name" type="text" placeholder="Smith, John" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Address *</label>
+        <input id="add-address" type="text" placeholder="123 Main St" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;"/>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;">
+          <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Apt/Unit</label>
+          <input id="add-apt" type="text" placeholder="Apt 2B" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;"/>
+        </div>
+        <div style="flex:2;">
+          <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">City</label>
+          <input id="add-city" type="text" placeholder="West Valley City" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;">
+          <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">State</label>
+          <input id="add-state" type="text" placeholder="UT" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;"/>
+        </div>
+        <div style="flex:2;">
+          <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Zip Code</label>
+          <input id="add-zip" type="text" placeholder="84120" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;"/>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Status</label>
+        <select id="add-status" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Less Active">Less Active</option>
+          <option value="Don't Know" selected>Don't Know</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">District</label>
+        <select id="add-district" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;">
+          <option value="">-- None --</option>
+          <option value="District 1">District 1</option>
+          <option value="District 2">District 2</option>
+          <option value="District 3">District 3</option>
+        </select>
+      </div>
+    </div>
+    <div id="add-error" style="display:none;margin-top:10px;font-size:12px;color:#c0392b;background:#fff5f5;border:1px solid #fcc;border-radius:8px;padding:8px 12px;"></div>
+    <div style="display:flex;gap:10px;margin-top:18px;">
+      <button onclick="closeAddRecord()" style="padding:11px 18px;background:#f5f4f0;color:#555;border:1px solid #ddd;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;">Cancel</button>
+      <button onclick="saveNewRecord()" style="flex:1;padding:11px;background:#2c5f3e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Add Record</button>
+    </div>
+  </div>
+</div>
+
 <!-- App -->
 <div id="app">
   <div id="topbar">
@@ -369,10 +429,11 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
         <button class="view-tab active" id="tab-map" onclick="switchView('map')">🗺 Map</button>
         <button class="view-tab" id="tab-board" onclick="switchView('board')">📋 Board</button>
       </div>
+      <button class="tb-btn" id="add-btn" onclick="openAddRecord()" style="background:#2c5f3e;color:#fff;">+ Add Record</button>
       <button class="tb-btn" id="lasso-btn" onclick="toggleLasso()">✏️ <span class="lasso-label">Select</span></button>
-      <button class="tb-btn" id="refresh-btn" onclick="refreshData()">↺</button>
+      <button class="tb-btn" id="refresh-btn" onclick="refreshData()">↺ Refresh</button>
       <button class="tb-btn" id="settings-btn" onclick="showSettings()">⇥ Log out</button>
-      <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn{display:none!important;}}</style>
+      <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn,#add-btn{display:none!important;}}</style>
     </div>
   </div>
   <div id="filter-bar">
@@ -440,15 +501,15 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   <div id="bottom-nav">
     <button class="nav-btn active" id="nav-map" onclick="switchView('map')"><span class="nav-icon">🗺</span>Map</button>
     <button class="nav-btn" id="nav-board" onclick="switchView('board')"><span class="nav-icon">📋</span>Board</button>
+    <button class="nav-btn" id="nav-add" onclick="openAddRecord()" style="color:#2c5f3e;"><span class="nav-icon">➕</span>Add</button>
     <button class="nav-btn" id="nav-select" onclick="toggleLasso()"><span class="nav-icon">✏️</span>Select</button>
-    <button class="nav-btn" id="nav-refresh" onclick="refreshData()"><span class="nav-icon">↺</span>Refresh</button>
     <button class="nav-btn" id="nav-settings" onclick="showSettings()"><span class="nav-icon">⇥</span>Log out</button>
   </div>
 </div>
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYI0RhbX3jUphSH7EkDePYUY8_abp-YUTh9G02rFmp9dZ3mJ5GdGq0zWZbEeuwzTEoIg/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxOBxKenlIiIyDjy3nEB5Qc-EWATEgaWENEqZI300b_MYTDHVLxyzkNiwfekRtBWbjYFQ/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
 const USERS = {
   'cw': 'cw2026',
@@ -1054,7 +1115,99 @@ async function deleteSheetRow(p){
   }
 }
 
-// ── Mobile: long press still opens edit menu ──
+// ── Add New Record ──
+function openAddRecord(){
+  // Clear fields
+  ['add-name','add-address','add-apt','add-city','add-state','add-zip'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('add-status').value="Don't Know";
+  document.getElementById('add-district').value='';
+  document.getElementById('add-error').style.display='none';
+  document.getElementById('add-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('add-name').focus(),100);
+}
+
+function closeAddRecord(){
+  document.getElementById('add-modal').style.display='none';
+}
+
+async function saveNewRecord(){
+  const name    = document.getElementById('add-name').value.trim();
+  const address = document.getElementById('add-address').value.trim();
+  const apt     = document.getElementById('add-apt').value.trim();
+  const city    = document.getElementById('add-city').value.trim();
+  const state   = document.getElementById('add-state').value.trim();
+  const zip     = document.getElementById('add-zip').value.trim();
+  const status  = document.getElementById('add-status').value;
+  const district= document.getElementById('add-district').value;
+  const errEl   = document.getElementById('add-error');
+
+  if(!name){ errEl.textContent='Name is required.'; errEl.style.display='block'; return; }
+  if(!address){ errEl.textContent='Address is required.'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+
+  // Build full address for geocoding
+  let fullAddr = address;
+  if(apt)   fullAddr += ' ' + apt;
+  if(city)  fullAddr += ', ' + city;
+  if(state) fullAddr += ', ' + state;
+  if(zip)   fullAddr += ' ' + zip;
+
+  const saveBtn = document.querySelector('#add-modal button:last-child');
+  saveBtn.textContent = 'Saving…';
+  saveBtn.disabled = true;
+
+  // Save to sheet via Apps Script
+  const cbName = '__wardmap_add_' + Date.now();
+  const params = encodeURIComponent(JSON.stringify([name, address, apt, city, state, zip, status, '', '', district]));
+  const url = currentScriptUrl + '?action=addrow&data=' + params + '&callback=' + cbName;
+
+  const result = await new Promise(resolve => {
+    const timeout = setTimeout(() => { delete window[cbName]; script.remove(); resolve({success:false}); }, 10000);
+    window[cbName] = (data) => { clearTimeout(timeout); delete window[cbName]; script.remove(); resolve(data); };
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => { clearTimeout(timeout); delete window[cbName]; resolve({success:false}); };
+    document.head.appendChild(script);
+  });
+
+  saveBtn.textContent = 'Add Record';
+  saveBtn.disabled = false;
+
+  if(!result.success){
+    errEl.textContent = 'Failed to save. Check your Apps Script.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  closeAddRecord();
+  showToast('✅ Record added! Geocoding pin…');
+
+  // Geocode and add pin
+  const cfg = getStatusConfig(status);
+  let latLng = null;
+  try { latLng = await geocodeAddress(fullAddr); } catch(e){}
+
+  const newRowIndex = result.rowIndex;
+  const newPerson = {name, fullAddr, label:cfg.label, color:cfg.color, latLng, rowIndex:newRowIndex, district};
+  allPeople.push(newPerson);
+
+  if(latLng){
+    const cache = loadCache();
+    cache[fullAddr] = {lat:latLng.lat(), lng:latLng.lng()};
+    saveCache(cache);
+    const marker = createMarker(latLng, newPerson);
+    markers.push(marker);
+    map.panTo(latLng);
+    map.setZoom(16);
+    showToast('✅ Pin added!');
+  } else {
+    markers.push(null);
+    showToast('⚠️ Saved but could not geocode address.', true);
+  }
+  renderBoard(allPeople);
+}
 
 function toggleCol(cardsId,toggleEl){
   if(window.innerWidth>=640)return;
