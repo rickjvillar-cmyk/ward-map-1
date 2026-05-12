@@ -142,9 +142,9 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 #district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
 .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; cursor: pointer; user-select: none; }
 .filter-row:last-child { margin-bottom: 0; }
-.filter-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.filter-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 10px; font-weight: 700; color: #fff; }
 .filter-cb.checked { border-color: transparent; }
-.filter-cb.checked::after { content: '✓'; font-size: 10px; font-weight: 700; color: #fff; }
+.filter-cb.unchecked { background: #eee !important; border-color: #ddd !important; }
 .filter-label { font-size: 12px; color: #333; display: flex; align-items: center; gap: 6px; }
 .filter-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
@@ -653,11 +653,11 @@ function toggleFilter(label){
   if(visibleStatuses.has(label)){
     visibleStatuses.delete(label);
     const cb=document.getElementById('fcb-'+label);
-    if(cb){cb.classList.remove('checked');cb.style.background='#eee';cb.style.borderColor='#ddd';}
+    if(cb){cb.classList.remove('checked');cb.classList.add('unchecked');cb.textContent='';}
   } else {
     visibleStatuses.add(label);
     const cb=document.getElementById('fcb-'+label);
-    if(cb){cb.classList.add('checked');cb.style.background=STAT_COLORS[label]||'#546e7a';cb.style.borderColor='transparent';}
+    if(cb){cb.classList.add('checked');cb.classList.remove('unchecked');cb.textContent='✓';}
   }
   applyVisibility();
 }
@@ -680,11 +680,11 @@ function toggleDistrict(label){
   if(visibleDistricts.has(label)){
     visibleDistricts.delete(label);
     const cb=document.getElementById('dcb-'+key);
-    if(cb){cb.classList.remove('checked');cb.style.background='#eee';cb.style.borderColor='#ddd';}
+    if(cb){cb.classList.remove('checked');cb.classList.add('unchecked');cb.textContent='';}
   } else {
     visibleDistricts.add(label);
     const cb=document.getElementById('dcb-'+key);
-    if(cb){cb.classList.add('checked');cb.style.background='#3a6fa8';cb.style.borderColor='transparent';}
+    if(cb){cb.classList.add('checked');cb.classList.remove('unchecked');cb.textContent='✓';}
   }
   applyVisibility();
 }
