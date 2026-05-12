@@ -524,7 +524,7 @@ function fetchViaJsonp(url){
 }
 
 // Geocode cache
-const CACHE_KEY='wardmap_geocache';
+const CACHE_KEY='wardmap_geocache_v2'; // bump version to clear old cache
 function loadCache(){try{return JSON.parse(localStorage.getItem(CACHE_KEY)||'{}');}catch(e){return{};}}
 function saveCache(cache){try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache));}catch(e){}}
 
