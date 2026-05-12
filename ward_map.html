@@ -651,11 +651,13 @@ async function fetchData(){
     });
     marker.addListener('click',()=>{
       const pidx=allPeople.findIndex(x=>x.name===name&&x.fullAddr===fullAddr);
-      infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:190px">
-        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(name)}</div>
-        <div style="display:inline-block;background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px">${esc(label)}</div>
-        <div style="font-size:12px;color:#666;line-height:1.5;margin-bottom:8px">${esc(fullAddr)}</div>
-        <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="width:100%;padding:7px;background:#2c5f3e;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">✎ Edit contact</button>
+      infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:180px">
+        <div style="font-weight:600;font-size:14px;margin-bottom:5px">${esc(name)}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <span style="background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${esc(label)}</span>
+          <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#4a7c5e;font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">✎ Edit</button>
+        </div>
+        <div style="font-size:12px;color:#888;line-height:1.5">${esc(fullAddr)}</div>
       </div>`);
       infoWindow.open(map,marker);
     });
