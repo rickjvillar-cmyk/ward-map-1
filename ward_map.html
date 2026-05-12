@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#2c5f3e">
-<title>Ward Map</title>
+<title>Constitution Ward Map</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -301,8 +301,19 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 <div id="login-screen" style="position:fixed;inset:0;z-index:2000;background:#f5f4f0;display:flex;align-items:center;justify-content:center;padding:24px;">
   <div style="background:#fff;border:1px solid #e2e0d8;border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="font-size:36px;margin-bottom:10px;">📍</div>
-      <h1 style="font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px;">Ward Map</h1>
+      <div style="margin-bottom:10px;">
+        <svg width="36" height="44" viewBox="0 0 56 68" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shadow -->
+          <ellipse cx="28" cy="63" rx="10" ry="4" fill="#c8cdd4" opacity="0.6"/>
+          <!-- Pin body -->
+          <path d="M28 2C17.5 2 9 10.5 9 21c0 14.5 19 39 19 39S47 35.5 47 21C47 10.5 38.5 2 28 2z" fill="#e8432d"/>
+          <!-- Inner dark circle -->
+          <circle cx="28" cy="21" r="9" fill="#c0392b" opacity="0.5"/>
+          <!-- White dot -->
+          <circle cx="28" cy="21" r="5" fill="white" opacity="0.9"/>
+        </svg>
+      </div>
+      <h1 style="font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px;">Constitution Ward Map</h1>
       <p style="font-size:13px;color:#888;margin-top:4px;">Sign in to continue</p>
     </div>
     <div style="margin-bottom:14px;">
@@ -422,7 +433,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 <!-- App -->
 <div id="app">
   <div id="topbar">
-    <h1>📍 Ward Map</h1>
+    <h1>📍 Constitution Ward Map</h1>
     <div class="topbar-right">
       <div id="stats"></div>
       <div class="view-tabs">
@@ -957,8 +968,9 @@ function showEditMenu(person, x, y){
     <div class="edit-menu-title">✎ Edit "${esc(person.name)}"</div>
     <div class="edit-menu-sep"></div>
     <div class="edit-menu-item" onclick="openEditModal('status')">🔄 Change status</div>
+    <div class="edit-menu-item" onclick="openEditModal('district')">📍 Change district</div>
     <div class="edit-menu-item" onclick="openEditModal('name')">👤 Edit name</div>
-    <div class="edit-menu-item" onclick="openEditModal('address')">📍 Edit address</div>
+    <div class="edit-menu-item" onclick="openEditModal('address')">🏠 Edit address</div>
     <div class="edit-menu-sep"></div>
     <div class="edit-menu-item danger" onclick="openEditModal('delete')">🗑 Delete record</div>`;
   const vw=window.innerWidth, vh=window.innerHeight;
@@ -998,6 +1010,20 @@ function openEditModal(mode){
         <label>Status</label>
         <select id="em-status">
           ${BOARD_ORDER.map(l=>`<option value="${l}" ${l===p.label?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>`;
+    saveBtn.textContent = 'Save';
+    saveBtn.style.background = '#2c5f3e';
+  } else if(mode === 'district'){
+    title.textContent = 'Change District';
+    body.innerHTML = `
+      <div class="edit-modal-field">
+        <label>District</label>
+        <select id="em-district">
+          <option value="">-- None --</option>
+          <option value="District 1" ${p.district==='District 1'?'selected':''}>District 1</option>
+          <option value="District 2" ${p.district==='District 2'?'selected':''}>District 2</option>
+          <option value="District 3" ${p.district==='District 3'?'selected':''}>District 3</option>
         </select>
       </div>`;
     saveBtn.textContent = 'Save';
@@ -1042,6 +1068,17 @@ async function saveEdit(){
     const newLabel = document.getElementById('em-status').value;
     closeEditModal();
     await updatePersonStatus(p, newLabel);
+
+  } else if(currentEditMode === 'district'){
+    const newDistrict = document.getElementById('em-district').value;
+    closeEditModal();
+    const districtColIndex = 10; // column J = 10
+    await updateSheetCell(p.rowIndex, districtColIndex, newDistrict, ()=>{
+      p.district = newDistrict;
+      applyVisibility();
+      renderBoard(allPeople);
+      showToast('✅ District updated!');
+    });
 
   } else if(currentEditMode === 'name'){
     const newName = document.getElementById('em-name').value.trim();
