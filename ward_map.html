@@ -122,6 +122,24 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   .filter-row:last-child { margin-right: 0; }
 }
 #filter-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
+#district-panel {
+  display: none;
+  position: absolute; top: 230px; right: 12px; z-index: 6;
+  background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
+  padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+  min-width: 150px;
+}
+@media (min-width: 640px) { #district-panel { display: block; } }
+#district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
+#district-panel {
+  display: none; /* hidden on mobile */
+  position: absolute; top: 230px; right: 12px; z-index: 6;
+  background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
+  padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+  min-width: 150px;
+}
+@media (min-width: 640px) { #district-panel { display: block; } }
+#district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
 .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; cursor: pointer; user-select: none; }
 .filter-row:last-child { margin-bottom: 0; }
 .filter-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
@@ -306,6 +324,38 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <input type="text" id="board-search" placeholder="Search by name or address…" oninput="filterBoard(this.value)"/>
     </div>
   </div>
+  <!-- District filter — desktop only -->
+  <div id="district-panel">
+    <div class="fp-title">Districts</div>
+    <div class="filter-row" onclick="toggleDistrict('District 1')">
+      <div class="filter-cb checked" id="dcb-District_1" style="background:#3a6fa8"></div>
+      <div class="filter-label">District 1</div>
+    </div>
+    <div class="filter-row" onclick="toggleDistrict('District 2')">
+      <div class="filter-cb checked" id="dcb-District_2" style="background:#3a6fa8"></div>
+      <div class="filter-label">District 2</div>
+    </div>
+    <div class="filter-row" onclick="toggleDistrict('District 3')">
+      <div class="filter-cb checked" id="dcb-District_3" style="background:#3a6fa8"></div>
+      <div class="filter-label">District 3</div>
+    </div>
+  </div>
+  <!-- District filter — desktop only -->
+  <div id="district-panel">
+    <div class="fp-title">Districts</div>
+    <div class="filter-row" onclick="toggleDistrict('District 1')">
+      <div class="filter-cb checked" id="dcb-District_1" style="background:#3a6fa8"></div>
+      <div class="filter-label">District 1</div>
+    </div>
+    <div class="filter-row" onclick="toggleDistrict('District 2')">
+      <div class="filter-cb checked" id="dcb-District_2" style="background:#3a6fa8"></div>
+      <div class="filter-label">District 2</div>
+    </div>
+    <div class="filter-row" onclick="toggleDistrict('District 3')">
+      <div class="filter-cb checked" id="dcb-District_3" style="background:#3a6fa8"></div>
+      <div class="filter-label">District 3</div>
+    </div>
+  </div>
   <div id="content">
     <div id="map-view">
       <div id="map"></div>
@@ -366,6 +416,8 @@ let allPeople=[],selectedPeople=[],lassoActive=false;
 let currentScriptUrl='',currentApiKey='';
 let statusColIndex=2; // default: column C (0-based index 2 = col 3)
 let visibleStatuses=new Set(['Active','Inactive','Less Active',"Don't Know"]);
+let visibleDistricts=new Set(['District 1','District 2','District 3','']);
+let visibleDistricts=new Set(['District 1','District 2','District 3','']);
 let dragSrcPerson=null;
 
 // ── Login ──
@@ -492,7 +544,7 @@ async function fetchData(){
   const col=n=>headers.indexOf(n);
   const iName=col('name'),iStatus=col('status'),iAddr=col('address');
   const iApt=col('apt/unit')>=0?col('apt/unit'):col('apt')>=0?col('apt'):col('unit');
-  const iCity=col('city'),iState=col('state'),iZip=col('zip');
+  const iCity=col('city'),iState=col('state'),iZip=col('zip'),iDistrict=col('district');
   if(iName<0||iStatus<0||iAddr<0){showError('Missing columns. Row 1 must have: Name | Status | Address\n\nFound: '+headers.join(', '));return;}
   statusColIndex=iStatus+1;
   const data=rows.slice(1).filter(r=>r.some(c=>String(c||'').trim()));
@@ -516,7 +568,8 @@ async function fetchData(){
     if(state)fullAddr+=', '+state;
     if(zip)fullAddr+=' '+zip;
     const cfg=getStatusConfig(status);
-    return {name,fullAddr,label:cfg.label,color:cfg.color,rowIndex:i+2,needsGeocode:!cache[fullAddr]};
+    const district=iDistrict>=0?String(row[iDistrict]||'').trim():'';
+    return {name,fullAddr,label:cfg.label,color:cfg.color,rowIndex:i+2,needsGeocode:!cache[fullAddr],district};
   }).filter(Boolean);
 
   const uncachedCount=parsed.filter(p=>p.needsGeocode).length;
@@ -544,7 +597,7 @@ async function fetchData(){
       }catch(e){}
       if(geocodedSoFar<uncachedCount)await sleep(50);
     }
-    allPeople.push({name:p.name,fullAddr:p.fullAddr,label:p.label,color:p.color,latLng,rowIndex:p.rowIndex});
+    allPeople.push({name:p.name,fullAddr:p.fullAddr,label:p.label,color:p.color,latLng,rowIndex:p.rowIndex,district:p.district});
     if(latLng){
       const name=p.name,color=p.color,label=p.label,fullAddr=p.fullAddr;
       // Offset pins that share the same coordinates so both are visible
@@ -561,7 +614,7 @@ async function fetchData(){
       const marker=new google.maps.Marker({
         position:displayPos,map,title:name,
         icon:{url:makePinSvg(color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)},
-        visible:visibleStatuses.has(label)
+        visible:visibleStatuses.has(label)&&visibleDistricts.has(p.district||'')
       });
       marker.addListener('click',()=>{
         infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:160px">
@@ -610,10 +663,38 @@ function toggleFilter(label){
   applyVisibility();
 }
 
+function toggleDistrict(label){
+  if(visibleDistricts.has(label)){
+    visibleDistricts.delete(label);
+    const cb=document.getElementById('dcb-'+label.replace(/ /g,'_'));
+    if(cb){cb.classList.remove('checked');cb.style.background='#eee';cb.style.borderColor='#ddd';}
+  } else {
+    visibleDistricts.add(label);
+    const cb=document.getElementById('dcb-'+label.replace(/ /g,'_'));
+    if(cb){cb.classList.add('checked');cb.style.background='#3a6fa8';cb.style.borderColor='transparent';}
+  }
+  applyVisibility();
+}
+
+function toggleDistrict(label){
+  const key=label.replace(/ /g,'_');
+  if(visibleDistricts.has(label)){
+    visibleDistricts.delete(label);
+    const cb=document.getElementById('dcb-'+key);
+    if(cb){cb.classList.remove('checked');cb.style.background='#eee';cb.style.borderColor='#ddd';}
+  } else {
+    visibleDistricts.add(label);
+    const cb=document.getElementById('dcb-'+key);
+    if(cb){cb.classList.add('checked');cb.style.background='#3a6fa8';cb.style.borderColor='transparent';}
+  }
+  applyVisibility();
+}
+
 function applyVisibility(){
   allPeople.forEach((p,i)=>{
     const m=markers[i];
-    if(m)m.setVisible(visibleStatuses.has(p.label));
+    const districtKey=p.district||'';
+    if(m)m.setVisible(visibleStatuses.has(p.label)&&visibleDistricts.has(districtKey));
   });
 }
 
@@ -837,11 +918,10 @@ function toggleLasso(){
 
 function computeSelection(polygon){
   // Only select pins that are currently visible (match active filters)
-  selectedPeople=allPeople.filter(p=>
-    p.latLng&&
-    visibleStatuses.has(p.label)&&
-    google.maps.geometry.poly.containsLocation(p.latLng,polygon)
-  );
+  selectedPeople=allPeople.filter(p=>{
+    const dk=p.district||'';
+    return p.latLng&&visibleStatuses.has(p.label)&&visibleDistricts.has(dk)&&google.maps.geometry.poly.containsLocation(p.latLng,polygon);
+  });
   renderSelectionPanel();
 }
 
