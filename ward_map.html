@@ -113,9 +113,15 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 }
 /* Mobile: horizontal bars in the filter-bar wrapper */
 #filter-bar {
-  display: none;
+  display: none; /* hidden on desktop — panels use position:absolute instead */
   flex-shrink: 0;
   flex-direction: column;
+}
+/* On desktop, panels escape the hidden wrapper via position:absolute on #app */
+@media (min-width: 640px) {
+  #filter-panel, #district-panel {
+    display: block !important; /* override any inherited display:none from #filter-bar */
+  }
 }
 @media (max-width: 639px) {
   #filter-bar { display: flex; }
