@@ -50,6 +50,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 /* ── Topbar ── */
 #topbar { background: #fff; border-bottom: 1px solid #e2e0d8; padding: 0 max(14px,env(safe-area-inset-left)) 0 max(14px,env(safe-area-inset-right)); height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+@media (max-width: 639px) { #topbar { height: auto; padding: 10px 14px 8px; } }
 #topbar h1 { font-size: 15px; font-weight: 600; color: #111; white-space: nowrap; }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
 #stats { display: none; gap: 6px; flex-wrap: wrap; }
@@ -59,7 +60,13 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .view-tabs { display: flex; gap: 2px; background: #f0efe9; border-radius: 8px; padding: 3px; }
 .view-tab { padding: 5px 12px; font-size: 12px; font-weight: 500; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #888; white-space: nowrap; }
 .view-tab.active { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-@media (max-width: 639px) { .view-tabs { display: none; } #stats { display: none !important; } }
+@media (max-width: 639px) {
+  .view-tabs { display: none; }
+  #stats { display: none !important; }
+  #topbar { flex-wrap: wrap; }
+  #topbar h1 { width: 100%; font-size: 14px; }
+  .topbar-right { width: 100%; justify-content: flex-end; }
+}
 .tb-btn { padding: 7px 11px; font-size: 12px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; min-height: 36px; display: flex; align-items: center; gap: 4px; }
 #refresh-btn { background: #2c5f3e; color: #fff; }
 #refresh-btn:active { background: #1e4a2e; }
@@ -275,19 +282,19 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div class="fp-title">Show / Hide</div>
     <div class="filter-row" onclick="toggleFilter('Active')">
       <div class="filter-cb checked" id="fcb-Active" style="background:#2e7d32"></div>
-      <div class="filter-label"><div class="filter-dot" style="background:#2e7d32"></div>Active</div>
+      <div class="filter-label">Active</div>
     </div>
     <div class="filter-row" onclick="toggleFilter('Inactive')">
       <div class="filter-cb checked" id="fcb-Inactive" style="background:#c62828"></div>
-      <div class="filter-label"><div class="filter-dot" style="background:#c62828"></div>Inactive</div>
+      <div class="filter-label">Inactive</div>
     </div>
     <div class="filter-row" onclick="toggleFilter('Less Active')">
       <div class="filter-cb checked" id="fcb-Less Active" style="background:#e6c800"></div>
-      <div class="filter-label"><div class="filter-dot" style="background:#e6c800"></div>Less Active</div>
+      <div class="filter-label">Less Active</div>
     </div>
     <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
       <div class="filter-cb checked" id="fcb-Don't Know" style="background:#546e7a"></div>
-      <div class="filter-label"><div class="filter-dot" style="background:#546e7a"></div>Don't Know</div>
+      <div class="filter-label">Don't Know</div>
     </div>
   </div>
   <div id="content">
