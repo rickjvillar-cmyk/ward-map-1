@@ -91,7 +91,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 /* ── Status filter panel ── */
 #filter-panel {
-  position: absolute; top: 12px; right: 12px; z-index: 6;
+  position: absolute; top: 64px; right: 12px; z-index: 6;
   background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
   padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
   min-width: 150px;
@@ -109,6 +109,8 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     order: 2;
   }
   #topbar { order: 1; }
+  #filter-panel { order: 2; }
+  #district-panel { order: 3; }
   #mobile-stats { order: 4; }
   #search-bar-area { order: 5; }
   #content { order: 6; }
@@ -326,29 +328,29 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <div class="filter-label">District 3</div>
     </div>
   </div>
+  <!-- Status filter -->
+  <div id="filter-panel">
+    <div class="fp-title">Show / Hide</div>
+    <div class="filter-row" onclick="toggleFilter('Active')">
+      <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
+      <div class="filter-label">Active</div>
+    </div>
+    <div class="filter-row" onclick="toggleFilter('Inactive')">
+      <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
+      <div class="filter-label">Inactive</div>
+    </div>
+    <div class="filter-row" onclick="toggleFilter('Less Active')">
+      <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
+      <div class="filter-label">Less Active</div>
+    </div>
+    <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
+      <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
+      <div class="filter-label">Don't Know</div>
+    </div>
+  </div>
   <div id="content">
     <div id="map-view">
       <div id="map"></div>
-      <!-- Status filter -->
-      <div id="filter-panel">
-        <div class="fp-title">Show / Hide</div>
-        <div class="filter-row" onclick="toggleFilter('Active')">
-          <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
-          <div class="filter-label">Active</div>
-        </div>
-        <div class="filter-row" onclick="toggleFilter('Inactive')">
-          <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
-          <div class="filter-label">Inactive</div>
-        </div>
-        <div class="filter-row" onclick="toggleFilter('Less Active')">
-          <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
-          <div class="filter-label">Less Active</div>
-        </div>
-        <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
-          <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
-          <div class="filter-label">Don't Know</div>
-        </div>
-      </div>
       <div id="lasso-hint">✏️ Click/tap points · Double-click to close</div>
       <div id="selection-panel">
         <div id="sel-handle"></div>
