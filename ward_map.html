@@ -551,7 +551,7 @@ async function fetchData(){
   if(iName<0||iStatus<0||iAddr<0){showError('Missing columns. Row 1 must have: Name | Status | Address\n\nFound: '+headers.join(', '));return;}
   statusColIndex=iStatus+1;
   const data=rows.slice(1).filter(r=>r.some(c=>String(c||'').trim()));
-  const bounds=new google.maps.LatLngBounds();
+  let bounds=new google.maps.LatLngBounds();
   const stats={};
 
   // Load geocode cache - previously looked-up addresses load instantly
@@ -576,64 +576,59 @@ async function fetchData(){
   }).filter(Boolean);
 
   const uncachedCount=parsed.filter(p=>p.needsGeocode).length;
-  if(uncachedCount>0){
-    updateLoading(`Geocoding ${uncachedCount} new address${uncachedCount===1?'':'es'}…`,'Already-seen addresses load instantly ⚡');
-  } else {
-    updateLoading('Loading from cache…','Instant load ⚡');
+  const coordCount={};
+
+  // Helper to create a marker
+  function createMarker(latLng, p){
+    const {name,color,label,fullAddr,district}=p;
+    const coordKey=latLng.lat().toFixed(6)+','+latLng.lng().toFixed(6);
+    if(!coordCount[coordKey])coordCount[coordKey]=0;
+    const offset=coordCount[coordKey];
+    coordCount[coordKey]++;
+    const angle=(offset*137.5)*(Math.PI/180);
+    const radius=offset===0?0:0.00004*Math.ceil(offset/8);
+    const displayPos=new google.maps.LatLng(latLng.lat()+radius*Math.cos(angle),latLng.lng()+radius*Math.sin(angle));
+    const marker=new google.maps.Marker({
+      position:displayPos,map,title:name,
+      icon:{url:makePinSvg(color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)},
+      visible:visibleStatuses.has(label)&&(visibleDistricts.has(district||'')||!district)
+    });
+    marker.addListener('click',()=>{
+      infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:160px">
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(name)}</div>
+        <div style="display:inline-block;background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px">${esc(label)}</div>
+        <div style="font-size:12px;color:#666;line-height:1.5">${esc(fullAddr)}</div>
+      </div>`);
+      infoWindow.open(map,marker);
+    });
+    return marker;
   }
 
-  let geocodedSoFar=0;
-  const coordCount={}; // track duplicate coords for offset
+  // ── Phase 1: Place ALL cached pins instantly ──
+  updateLoading(uncachedCount>0?`Loading ${parsed.length} pins…`:'Loading from cache…','⚡ Instant load');
+  bounds=new google.maps.LatLngBounds();
+
+  // Pre-fill allPeople and markers arrays with nulls so indices align
   for(let i=0;i<parsed.length;i++){
     const p=parsed[i];
     stats[p.label]=(stats[p.label]||0)+1;
-    let latLng=null;
+    allPeople.push({name:p.name,fullAddr:p.fullAddr,label:p.label,color:p.color,latLng:null,rowIndex:p.rowIndex,district:p.district});
+    markers.push(null);
+  }
+
+  // Place cached pins immediately — no await, no loop delay
+  for(let i=0;i<parsed.length;i++){
+    const p=parsed[i];
     if(cache[p.fullAddr]){
       const c=cache[p.fullAddr];
-      latLng=new google.maps.LatLng(c.lat,c.lng);
-    } else {
-      geocodedSoFar++;
-      updateLoading(`Geocoding ${geocodedSoFar} of ${uncachedCount} new addresses…`,p.fullAddr);
-      try{
-        latLng=await geocodeAddress(p.fullAddr);
-        if(latLng)cache[p.fullAddr]={lat:latLng.lat(),lng:latLng.lng()};
-      }catch(e){}
-      if(geocodedSoFar<uncachedCount)await sleep(50);
-    }
-    allPeople.push({name:p.name,fullAddr:p.fullAddr,label:p.label,color:p.color,latLng,rowIndex:p.rowIndex,district:p.district});
-    if(latLng){
-      const name=p.name,color=p.color,label=p.label,fullAddr=p.fullAddr;
-      // Offset pins that share the same coordinates so both are visible
-      const coordKey=latLng.lat().toFixed(6)+','+latLng.lng().toFixed(6);
-      if(!coordCount[coordKey])coordCount[coordKey]=0;
-      const offset=coordCount[coordKey];
-      coordCount[coordKey]++;
-      // Spiral offset: each duplicate shifts slightly (about 5 meters)
-      const angle=(offset*137.5)*(Math.PI/180); // golden angle spread
-      const radius=offset===0?0:0.00004*Math.ceil(offset/8);
-      const offsetLat=latLng.lat()+radius*Math.cos(angle);
-      const offsetLng=latLng.lng()+radius*Math.sin(angle);
-      const displayPos=new google.maps.LatLng(offsetLat,offsetLng);
-      const marker=new google.maps.Marker({
-        position:displayPos,map,title:name,
-        icon:{url:makePinSvg(color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)},
-        visible:visibleStatuses.has(label)&&(visibleDistricts.has(p.district||'')||!p.district)
-      });
-      marker.addListener('click',()=>{
-        infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:160px">
-          <div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(name)}</div>
-          <div style="display:inline-block;background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:6px">${esc(label)}</div>
-          <div style="font-size:12px;color:#666;line-height:1.5">${esc(fullAddr)}</div>
-        </div>`);
-        infoWindow.open(map,marker);
-      });
-      markers.push(marker);
+      const latLng=new google.maps.LatLng(c.lat,c.lng);
+      allPeople[i].latLng=latLng;
+      markers[i]=createMarker(latLng,p);
       bounds.extend(latLng);
-    } else {
-      markers.push(null);
     }
   }
-  if(geocodedSoFar>0)saveCache(cache);
+
+  // Show map immediately with cached pins
   if(markers.filter(Boolean).length>0)map.fitBounds(bounds);
   const statHtml=Object.entries(stats).map(([label,count])=>
     `<div class="stat-pill" style="background:${(STAT_COLORS[label]||'#111111')}18;color:${STAT_COLORS[label]||'#111111'}">
@@ -642,7 +637,30 @@ async function fetchData(){
   document.getElementById('stats').innerHTML=statHtml;
   document.getElementById('mobile-stats').innerHTML=statHtml;
   renderBoard(allPeople);
-  hideLoading();
+  hideLoading(); // ← Map shows here, user can interact immediately
+
+  // ── Phase 2: Geocode new addresses in background ──
+  if(uncachedCount>0){
+    showToast(`Geocoding ${uncachedCount} new address${uncachedCount===1?'':'es'} in background…`);
+    let geocodedSoFar=0;
+    for(let i=0;i<parsed.length;i++){
+      const p=parsed[i];
+      if(!p.needsGeocode)continue;
+      geocodedSoFar++;
+      try{
+        const latLng=await geocodeAddress(p.fullAddr);
+        if(latLng){
+          cache[p.fullAddr]={lat:latLng.lat(),lng:latLng.lng()};
+          allPeople[i].latLng=latLng;
+          markers[i]=createMarker(latLng,p);
+          bounds.extend(latLng);
+        }
+      }catch(e){}
+      if(geocodedSoFar<uncachedCount)await sleep(50);
+    }
+    saveCache(cache);
+    showToast('✅ All pins loaded!');
+  }
 }
 
 // ── Status filter ──
