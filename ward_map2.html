@@ -161,6 +161,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .person-name { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 2px; }
 .person-addr { font-size: 12px; color: #999; line-height: 1.4; }
 .view-on-map { font-size: 11px; color: #4a7c5e; margin-top: 4px; font-weight: 500; }
+.card-actions { display: flex; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
+.card-action-link { font-size: 11px; font-weight: 500; color: #4a7c5e; cursor: pointer; }
+.card-action-link:hover { text-decoration: underline; }
+.change-status-link { color: #7c4a2c; }
 .card-status-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; margin-top: 4px; }
 
 /* Save toast */
@@ -693,7 +697,20 @@ function renderBoard(people){
       card.innerHTML=`
         <div class="person-name">${esc(p.name)}</div>
         <div class="person-addr">${esc(p.fullAddr)}</div>
-        ${p.latLng?`<div class="view-on-map" onclick="focusOnMap(${JSON.stringify(p.name)});event.stopPropagation()">↗ View on map</div>`:''}`;
+        <div class="card-actions">
+          ${p.latLng?`<span class="card-action-link view-map-link">↗ View on map</span>`:''}
+          <span class="card-action-link change-status-link">✎ Change status</span>
+        </div>`;
+
+      // Wire up action links after innerHTML is set
+      const viewLink=card.querySelector('.view-map-link');
+      const statusLink=card.querySelector('.change-status-link');
+      if(viewLink) viewLink.addEventListener('click',e=>{e.stopPropagation();focusOnMap(p.name);});
+      if(statusLink) statusLink.addEventListener('click',e=>{
+        e.stopPropagation();
+        const rect=statusLink.getBoundingClientRect();
+        showStatusMenu(p,rect.left,rect.top);
+      });
 
       // Desktop drag
       card.addEventListener('dragstart',e=>{
