@@ -90,59 +90,53 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 #map { width: 100%; height: 100%; }
 
 /* ── Status filter panel ── */
-#filter-panel {
-  position: absolute; top: 64px; right: 12px; z-index: 6;
-  background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
-  padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
-  min-width: 150px;
+/* ── Filter bars ── */
+/* Desktop: floating panels over map */
+#filter-panel, #district-panel {
+  display: none; /* hidden by default, shown on desktop via media query */
+}
+@media (min-width: 640px) {
+  #filter-panel {
+    display: block;
+    position: absolute; top: 64px; right: 12px; z-index: 6;
+    background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
+    padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+    min-width: 150px;
+  }
+  #district-panel {
+    display: block;
+    position: absolute; top: 230px; right: 12px; z-index: 6;
+    background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
+    padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+    min-width: 150px;
+  }
+}
+/* Mobile: horizontal bars in the filter-bar wrapper */
+#filter-bar {
+  display: none;
+  flex-shrink: 0;
+  flex-direction: column;
 }
 @media (max-width: 639px) {
-  #filter-panel {
-    position: relative !important; top: auto !important; right: auto !important;
-    left: auto !important; bottom: auto !important;
-    border-radius: 0; border-left: none; border-right: none; border-top: none;
-    box-shadow: none; padding: 8px 16px;
-    display: flex !important; flex-direction: row; align-items: center;
-    gap: 0; flex-shrink: 0; width: 100%;
-    background: #fff; border-bottom: 1px solid #e2e0d8;
+  #filter-bar { display: flex; }
+  #filter-panel, #district-panel {
+    display: flex !important;
+    position: static !important;
+    flex-direction: row; align-items: center;
+    padding: 8px 14px; gap: 0;
+    width: 100%; flex-shrink: 0;
+    background: #fff; border-radius: 0;
+    box-shadow: none; border: none;
+    border-bottom: 1px solid #e2e0d8;
     overflow-x: auto; -webkit-overflow-scrolling: touch;
-    order: 2;
+    min-width: unset;
   }
-  #topbar { order: 1; }
-  #filter-panel { order: 2; }
-  #district-panel { order: 3; }
-  #mobile-stats { order: 4; }
-  #search-bar-area { order: 5; }
-  #content { order: 6; }
-  #bottom-nav { order: 7; }
-  #filter-panel .fp-title { display: none; }
-  .filter-row { margin-bottom: 0; margin-right: 16px; flex-shrink: 0; }
+  #district-panel { background: #f8f8f6; }
+  #filter-panel .fp-title, #district-panel .fp-title { display: none; }
+  .filter-row { margin-bottom: 0; margin-right: 14px; flex-shrink: 0; }
   .filter-row:last-child { margin-right: 0; }
 }
-#filter-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
-
-#district-panel {
-  position: absolute; top: 170px; right: 12px; z-index: 6;
-  background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
-  padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
-  min-width: 150px;
-}
-@media (max-width: 639px) {
-  #district-panel {
-    position: relative !important; top: auto !important; right: auto !important;
-    left: auto !important; bottom: auto !important;
-    border-radius: 0; border-left: none; border-right: none; border-top: none;
-    box-shadow: none; padding: 8px 16px;
-    display: flex !important; flex-direction: row; align-items: center;
-    gap: 0; flex-shrink: 0; width: 100%;
-    background: #f8f8f8; border-bottom: 1px solid #e2e0d8;
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-    order: 3;
-  }
-  #district-panel .fp-title { display: none; }
-}
-@media (min-width: 640px) { #district-panel { display: block; } }
-#district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
+#filter-panel .fp-title, #district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
 .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; cursor: pointer; user-select: none; }
 .filter-row:last-child { margin-bottom: 0; }
 .filter-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ccc; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 10px; font-weight: 700; color: transparent; }
@@ -306,46 +300,47 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn{display:none!important;}}</style>
     </div>
   </div>
+  <!-- Filter bar wrapper — mobile: stacked rows, desktop: panels float over map via CSS -->
+  <div id="filter-bar">
+    <div id="filter-panel">
+      <div class="fp-title">Show / Hide</div>
+      <div class="filter-row" onclick="toggleFilter('Active')">
+        <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
+        <div class="filter-label">Active</div>
+      </div>
+      <div class="filter-row" onclick="toggleFilter('Inactive')">
+        <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
+        <div class="filter-label">Inactive</div>
+      </div>
+      <div class="filter-row" onclick="toggleFilter('Less Active')">
+        <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
+        <div class="filter-label">Less Active</div>
+      </div>
+      <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
+        <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
+        <div class="filter-label">Don't Know</div>
+      </div>
+    </div>
+    <div id="district-panel">
+      <div class="fp-title">Districts</div>
+      <div class="filter-row" onclick="toggleDistrict('District 1')">
+        <div class="filter-cb checked dcb-blue" id="dcb-District_1">✓</div>
+        <div class="filter-label">District 1</div>
+      </div>
+      <div class="filter-row" onclick="toggleDistrict('District 2')">
+        <div class="filter-cb checked dcb-blue" id="dcb-District_2">✓</div>
+        <div class="filter-label">District 2</div>
+      </div>
+      <div class="filter-row" onclick="toggleDistrict('District 3')">
+        <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
+        <div class="filter-label">District 3</div>
+      </div>
+    </div>
+  </div>
   <div id="mobile-stats"></div>
   <div id="search-bar-area">
     <div id="board-search-wrap">
       <input type="text" id="board-search" placeholder="Search by name or address…" oninput="filterBoard(this.value)"/>
-    </div>
-  </div>
-  <!-- District filter — desktop: floats over map, mobile: horizontal bar -->
-  <div id="district-panel">
-    <div class="fp-title">Districts</div>
-    <div class="filter-row" onclick="toggleDistrict('District 1')">
-      <div class="filter-cb checked dcb-blue" id="dcb-District_1">✓</div>
-      <div class="filter-label">District 1</div>
-    </div>
-    <div class="filter-row" onclick="toggleDistrict('District 2')">
-      <div class="filter-cb checked dcb-blue" id="dcb-District_2">✓</div>
-      <div class="filter-label">District 2</div>
-    </div>
-    <div class="filter-row" onclick="toggleDistrict('District 3')">
-      <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
-      <div class="filter-label">District 3</div>
-    </div>
-  </div>
-  <!-- Status filter -->
-  <div id="filter-panel">
-    <div class="fp-title">Show / Hide</div>
-    <div class="filter-row" onclick="toggleFilter('Active')">
-      <div class="filter-cb checked fcb-green" id="fcb-Active">✓</div>
-      <div class="filter-label">Active</div>
-    </div>
-    <div class="filter-row" onclick="toggleFilter('Inactive')">
-      <div class="filter-cb checked fcb-red" id="fcb-Inactive">✓</div>
-      <div class="filter-label">Inactive</div>
-    </div>
-    <div class="filter-row" onclick="toggleFilter('Less Active')">
-      <div class="filter-cb checked fcb-yellow" id="fcb-Less Active">✓</div>
-      <div class="filter-label">Less Active</div>
-    </div>
-    <div class="filter-row" onclick="toggleFilter(&quot;Don't Know&quot;)">
-      <div class="filter-cb checked fcb-grey" id="fcb-Don't Know">✓</div>
-      <div class="filter-label">Don't Know</div>
     </div>
   </div>
   <div id="content">
