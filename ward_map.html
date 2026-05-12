@@ -111,17 +111,12 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     min-width: 150px;
   }
 }
-/* Mobile: horizontal bars in the filter-bar wrapper */
+/* Filter bar */
+/* Mobile: two horizontal rows below topbar */
 #filter-bar {
-  display: none; /* hidden on desktop — panels use position:absolute instead */
+  display: none;
   flex-shrink: 0;
   flex-direction: column;
-}
-/* On desktop, panels escape the hidden wrapper via position:absolute on #app */
-@media (min-width: 640px) {
-  #filter-panel, #district-panel {
-    display: block !important; /* override any inherited display:none from #filter-bar */
-  }
 }
 @media (max-width: 639px) {
   #filter-bar { display: flex; }
@@ -141,6 +136,24 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   #filter-panel .fp-title, #district-panel .fp-title { display: none; }
   .filter-row { margin-bottom: 0; margin-right: 14px; flex-shrink: 0; }
   .filter-row:last-child { margin-right: 0; }
+}
+/* Desktop: filter-bar is position:absolute over the map, stacked vertically */
+@media (min-width: 640px) {
+  #filter-bar {
+    display: flex !important;
+    flex-direction: column;
+    position: absolute;
+    top: 64px; right: 12px;
+    z-index: 6; gap: 10px;
+    pointer-events: none;
+  }
+  #filter-panel, #district-panel {
+    display: block !important;
+    position: static !important;
+    background: #fff; border: 1px solid #e2e0d8; border-radius: 12px;
+    padding: 12px 14px; box-shadow: 0 2px 14px rgba(0,0,0,0.12);
+    min-width: 150px; pointer-events: all;
+  }
 }
 #filter-panel .fp-title, #district-panel .fp-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 9px; }
 .filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; cursor: pointer; user-select: none; }
@@ -306,7 +319,6 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn{display:none!important;}}</style>
     </div>
   </div>
-  <!-- Filter bar wrapper — mobile: stacked rows, desktop: panels float over map via CSS -->
   <div id="filter-bar">
     <div id="filter-panel">
       <div class="fp-title">Show / Hide</div>
