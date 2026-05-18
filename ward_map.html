@@ -992,10 +992,16 @@ async function fetchData(){
   document.getElementById('mobile-stats').innerHTML=statHtml;
   renderBoard(allPeople);
   hideLoading();
-  // Load notes in background, then update counters and board
+  // Load notes in background, then update counters and re-render board
   loadNotes().then(()=>{
     renderNoteCounters();
-    renderBoard(allPeople);
+    // Update just the note count badges without full re-render for performance
+    document.querySelectorAll('[data-person-name]').forEach(el=>{
+      const name=el.dataset.personName;
+      const count=getNoteCount(name);
+      el.textContent=count>0?`📝 Notes (${count})`:'📝 Notes (0)';
+      el.classList.toggle('has-notes',count>0);
+    });
   }); // ← Map shows here, user can interact immediately
 
   // ── Phase 2: Geocode new addresses in background ──
@@ -1160,7 +1166,16 @@ async function submitNote(){
   if(!text) return;
   const contact=currentNoteContact;
   const now=new Date();
-  const timestamp=now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  // Cross-platform timestamp (toLocaleString options not supported on all mobile browsers)
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mo=months[now.getMonth()];
+  const d=now.getDate();
+  const yr=now.getFullYear();
+  let h=now.getHours();
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const ampm=h>=12?'PM':'AM';
+  h=h%12||12;
+  const timestamp=`${mo} ${d}, ${yr}, ${h}:${m} ${ampm}`;
   const author=currentUser?currentUser.username:'unknown';
   const authorName=currentUser?currentUser.name:'Unknown';
   if(editingNoteId){
