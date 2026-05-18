@@ -687,8 +687,17 @@ let usersCache = null; // loaded from sheet
 
 function getUsers(){
   if(usersCache) return usersCache;
-  // Fallback default while loading
-  return {'cw':{name:'Admin',username:'cw',password:'dc4',role:'admin',status:'active'}};
+  // Hardcoded admin always works even before sheet loads
+  return {'cw':{name:'Rick Villar',username:'cw',password:'dc4',role:'admin',status:'active'}};
+}
+
+function mergeAdminIntoUsers(users){
+  // Always ensure cw/admin is present
+  if(!users['cw']){
+    users['cw']={name:'Rick Villar',username:'cw',password:'dc4',role:'admin',status:'active'};
+  }
+  users['cw'].role='admin';
+  return users;
 }
 
 function saveUsers(users){ usersCache = users; }
@@ -709,17 +718,17 @@ async function loadUsers(){
     if(data&&data.table&&data.table.rows){
       data.table.rows.forEach((row,idx)=>{
         if(!row.c||!row.c[1]) return;
-        // Columns: User (display name) | Username | Password | Status
+        // Columns: User | Username | Password | Role | Status
         const name    =row.c[0]?String(row.c[0].v||'').trim():'';
         const username=row.c[1]?String(row.c[1].v||'').trim().toLowerCase():'';
         const password=row.c[2]?String(row.c[2].v||'').trim():'';
-        const status  =row.c[3]?String(row.c[3].v||'').trim().toLowerCase():'active';
-        // cw is always admin, everyone else standard
-        const role = username==='cw'?'admin':'standard';
+        const role    =username==='cw'?'admin':(row.c[3]?String(row.c[3].v||'').trim().toLowerCase():'standard');
+        const status  =row.c[4]?String(row.c[4].v||'').trim().toLowerCase():'active';
         if(!username) return;
         users[username]={name,username,password,role,status,rowIndex:idx+2};
       });
     }
+    mergeAdminIntoUsers(users);
     usersCache=users;
     return users;
   }catch(e){
@@ -743,35 +752,38 @@ function doLogin(){
   const username = document.getElementById('login-user').value.trim().toLowerCase();
   const pass     = document.getElementById('login-pass').value;
   const errEl    = document.getElementById('login-error');
-  const users    = getUsers();
-  const u        = users[username];
-  if(u && u.password===pass && u.status!=='deactivated'&&u.status!=='Deactivated'){
-    errEl.style.display='none';
-    currentUser = {username, name:u.name, role:u.role};
-    sessionStorage.setItem('wardmap_current_user', JSON.stringify(currentUser));
-    document.getElementById('login-screen').style.display='none';
-    startApp();
-  } else if(u && (u.status==='deactivated'||u.status==='Deactivated')){
-    errEl.textContent='Your account has been deactivated.';
-    errEl.style.display='block';
-  } else {
-    // If users not loaded yet from sheet, try loading then re-checking
-    loadUsers().then(freshUsers=>{
-      const fu=freshUsers[username];
-      if(fu && fu.password===pass && fu.status!=='deactivated'&&fu.status!=='Deactivated'){
-        errEl.style.display='none';
-        currentUser={username,name:fu.name,role:fu.role};
-        sessionStorage.setItem('wardmap_current_user',JSON.stringify(currentUser));
-        document.getElementById('login-screen').style.display='none';
-        startApp();
-      } else {
-        errEl.textContent='Incorrect username or password';
-        errEl.style.display='block';
-        document.getElementById('login-pass').value='';
-        document.getElementById('login-pass').focus();
-      }
-    });
+
+  function tryLogin(users){
+    const u = users[username];
+    if(u && u.password===pass && u.status!=='deactivated' && u.status!=='Deactivated'){
+      errEl.style.display='none';
+      currentUser={username, name:u.name, role:u.role||'standard'};
+      sessionStorage.setItem('wardmap_current_user',JSON.stringify(currentUser));
+      document.getElementById('login-screen').style.display='none';
+      startApp();
+      return true;
+    } else if(u && (u.status==='deactivated'||u.status==='Deactivated')){
+      errEl.textContent='Your account has been deactivated.';
+      errEl.style.display='block';
+      return true;
+    }
+    return false;
   }
+
+  // Check cached/hardcoded users first (instant)
+  if(tryLogin(getUsers())) return;
+
+  // Not found yet — load from sheet then try again
+  errEl.textContent='Checking…';
+  errEl.style.display='block';
+  loadUsers().then(freshUsers=>{
+    if(!tryLogin(freshUsers)){
+      errEl.textContent='Incorrect username or password';
+      errEl.style.display='block';
+      document.getElementById('login-pass').value='';
+      document.getElementById('login-pass').focus();
+    }
+  });
 }
 
 function startApp(){
@@ -1233,7 +1245,7 @@ function toggleUserStatus(uname,newStatus){
   users[uname].status=newStatus;
   // Save to sheet
   const row=users[uname].rowIndex;
-  if(row) updateSheetCell(row, 4, newStatus, ()=>{});
+  if(row) updateSheetCell(row, 5, newStatus, ()=>{});
   saveUsers(users); renderUsersTable();
   showToast(`✅ User ${newStatus==='active'?'reactivated':'deactivated'}`);
 }
@@ -1272,7 +1284,7 @@ async function saveUserForm(){
     users[editingUsername]={...users[editingUsername],name,password:pass,role};
   } else {
     // Add new row to Users sheet
-    const rowData=[name,uname,pass,'active'];
+    const rowData=[name,uname,pass,'standard','active'];
     const cbName='__user_add_'+Date.now();
     const params=encodeURIComponent(JSON.stringify(rowData));
     const url=currentScriptUrl+'?action=adduser&data='+params+'&callback='+cbName;
