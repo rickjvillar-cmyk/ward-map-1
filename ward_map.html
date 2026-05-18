@@ -531,7 +531,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div class="users-table-wrap">
       <table class="users-table">
         <thead><tr>
-          <th>Name</th><th>Username</th><th>Password</th><th>Status</th><th>Actions</th>
+          <th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>Actions</th>
         </tr></thead>
         <tbody id="users-tbody"></tbody>
       </table>
@@ -1056,8 +1056,8 @@ let notesLoaded = false;
 let currentNoteContact = null;
 let editingNoteId = null;
 
-async function loadNotes(){
-  if(notesLoaded) return;
+async function loadNotes(forceRefresh=false){
+  if(notesLoaded && !forceRefresh) return;
   try{
     const cbName='__notes_load_'+Date.now();
     const url=`https://docs.google.com/spreadsheets/d/1P6mKsfULU7d4_1QAopJYmdowJRupJkfv94iZwS0RiyQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&gid=${NOTES_SHEET_GID}`;
@@ -1130,7 +1130,7 @@ function openNotesInEditModal(person){
 
   renderNotesPanel(person.name);
   document.getElementById('edit-modal').classList.add('open');
-  loadNotes().then(()=>renderNotesPanel(person.name));
+  loadNotes(true).then(()=>renderNotesPanel(person.name));
 }
 
 function showNoteCompose(){
@@ -1247,7 +1247,7 @@ function renderUsersTable(){
     <tr>
       <td><strong>${esc(u.name)}</strong></td>
       <td style="font-family:monospace;font-size:12px">${esc(uname)}</td>
-      <td style="font-family:monospace;font-size:12px">${esc(u.password)}</td>
+      <td><span class="role-badge">${esc(u.role||'standard')}</span></td>
       <td><span class="status-badge ${u.status==='active'?'status-active':'status-deactivated'}">${u.status==='active'?'Active':'Deactivated'}</span></td>
       <td>
         <button class="user-action-btn" onclick="openUserForm('${uname}')">Edit</button>
