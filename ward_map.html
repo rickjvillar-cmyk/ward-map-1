@@ -655,7 +655,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybBWFbDiICV3Wsr8qN6XQNJu3R5FEKePF6CoIIHCPg8i01jVd-oqPIh4FU_6Gng1OLug/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoRXw3aGeW2U1Kx6OgDmnUc3bqlfpE7HsyYzR5OaBypI1-s0FSqercoDAEan9qnA7e1g/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
 // Legacy USERS removed — now managed via getUsers() / saveUsers()
 const SK_SCRIPT='wardmap_script_url', SK_API='wardmap_api_key';
@@ -703,7 +703,9 @@ function mergeAdminIntoUsers(users){
   return users;
 }
 
-function saveUsers(users){ usersCache = users; }
+function saveUsers(users){
+  usersCache=users;
+}
 
 async function loadUsers(){
   try{
@@ -731,11 +733,12 @@ async function loadUsers(){
         users[username]={name,username,password,role,status,rowIndex:idx+2};
       });
     }
+    // Always ensure hardcoded admin is present and correct
     mergeAdminIntoUsers(users);
     usersCache=users;
     return users;
   }catch(e){
-    console.warn('Users load failed:',e);
+    console.warn('Users load failed — using defaults:',e);
     return getUsers();
   }
 }
@@ -1262,7 +1265,7 @@ function renderUsersTable(){
 function toggleUserStatus(uname,newStatus){
   const users=getUsers(); if(!users[uname]) return;
   users[uname].status=newStatus;
-  // Update Status column (col 5) in Users sheet
+  // Update Status in Users sheet
   const row=users[uname].rowIndex;
   if(row){
     const cbName='__user_status_'+Date.now();
@@ -1331,7 +1334,9 @@ async function saveUserForm(){
     users[editingUsername]={...users[editingUsername],name,password:pass,role};
   } else {
     // Add new row to Users sheet
-    const rowData=[name,uname,pass,'standard','active'];
+
+    // Add to sheet
+    const rowData=[name,uname,pass,role,'active'];
     const cbName='__user_add_'+Date.now();
     const params=encodeURIComponent(JSON.stringify(rowData));
     const url=currentScriptUrl+'?action=adduser&data='+params+'&callback='+cbName;
