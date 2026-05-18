@@ -228,7 +228,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .person-name { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 2px; }
 .person-addr { font-size: 12px; color: #999; line-height: 1.4; }
 .view-on-map { font-size: 11px; color: #4a7c5e; margin-top: 4px; font-weight: 500; }
-.card-actions { display: flex; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
+.card-actions { display: flex; gap: 10px; margin-top: 6px; flex-wrap: nowrap; align-items: center; overflow: hidden; }
 .card-action-link { font-size: 11px; font-weight: 500; color: #4a7c5e; cursor: pointer; }
 .card-action-link:hover { text-decoration: underline; }
 .change-status-link { color: #7c4a2c; }
@@ -947,7 +947,7 @@ async function fetchData(){
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
           <span style="background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${esc(label)}</span>
           <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#4a7c5e;font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">✎ Edit</button>
-          <button onclick="openNotesFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#888;font-size:11px;font-weight:500;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">📝 Notes</button>
+          <button onclick="openNotesFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#888;font-size:11px;font-weight:500;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">📝 Notes (${getNoteCount(name)})</button>
         </div>
         <div style="font-size:12px;color:#888;line-height:1.5">${esc(fullAddr)}</div>
       </div>`);
@@ -1115,7 +1115,7 @@ function renderNoteCounters(){
   document.querySelectorAll('[data-person-name]').forEach(el=>{
     const name=el.dataset.personName;
     const count=getNoteCount(name);
-    el.textContent=count>0?`${count} Note${count===1?'':'s'}`:'Notes';
+    el.textContent=count>0?`📝 Notes (${count})`:'📝 Notes (0)';
     el.classList.toggle('has-notes',count>0);
   });
 }
@@ -1442,9 +1442,9 @@ function renderBoard(people){
         <div class="person-name">${esc(p.name)}</div>
         <div class="person-addr">${esc(p.fullAddr)}</div>
         <div class="card-actions">
-          ${p.latLng?`<span class="card-action-link view-map-link">↗ View on map</span>`:''}
-          <span class="card-action-link edit-contact-link">✎ Edit contact</span>
-          <span class="card-note-count has-notes" data-person-name="${esc(p.name)}">Notes</span>
+          ${p.latLng?`<span class="card-action-link view-map-link">↗ View</span>`:''}
+          <span class="card-action-link edit-contact-link">✎ Edit</span>
+          <span class="card-note-count" data-person-name="${esc(p.name)}">📝 Notes (0)</span>
         </div>`;
 
       // Wire up action links after innerHTML is set
