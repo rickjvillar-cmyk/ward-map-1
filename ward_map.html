@@ -990,8 +990,11 @@ async function fetchData(){
   document.getElementById('mobile-stats').innerHTML=statHtml;
   renderBoard(allPeople);
   hideLoading();
-  // Load notes in background
-  loadNotes(); // ← Map shows here, user can interact immediately
+  // Load notes in background, then update counters and board
+  loadNotes().then(()=>{
+    renderNoteCounters();
+    renderBoard(allPeople);
+  }); // ← Map shows here, user can interact immediately
 
   // ── Phase 2: Geocode new addresses in background ──
   if(uncachedCount>0){
@@ -1325,11 +1328,20 @@ async function saveUserForm(){
   if(!editingUsername&&users[uname]){errEl.textContent='Username already exists.';errEl.style.display='block';return;}
 
   if(editingUsername){
-    // Update existing row in sheet
+    // Update existing row in Users sheet
     const u=users[editingUsername];
     if(u&&u.rowIndex){
-      await updateSheetCell(u.rowIndex,1,name,()=>{});
-      await updateSheetCell(u.rowIndex,3,pass,()=>{});
+      const updateUser=(row,col,val)=>new Promise(resolve=>{
+        const cbName='__uu_'+Date.now();
+        const url=currentScriptUrl+'?action=updateuser&row='+row+'&col='+col+'&value='+encodeURIComponent(val)+'&callback='+cbName;
+        const timeout=setTimeout(()=>{delete window[cbName];s.remove();resolve();},8000);
+        window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+        const s=document.createElement('script');s.src=url;
+        s.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve();};
+        document.head.appendChild(s);
+      });
+      await updateUser(u.rowIndex,1,name);
+      await updateUser(u.rowIndex,3,pass);
     }
     users[editingUsername]={...users[editingUsername],name,password:pass,role};
   } else {
