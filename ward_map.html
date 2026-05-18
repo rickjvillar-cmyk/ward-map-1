@@ -1186,7 +1186,7 @@ async function submitNote(){
   if(editingNoteId){
     const note=(notesCache[contact]||[]).find(n=>n.noteId===editingNoteId);
     if(!note) return;
-    await updateSheetCell(note.rowIndex, 3, text, ()=>{
+    await updateSheetCell(note.rowIndex, 4, text, ()=>{
       note.text=text; hideNoteCompose(); renderNotesPanel(contact); renderNoteCounters(); showToast('✅ Note updated!');
     });
   } else {
