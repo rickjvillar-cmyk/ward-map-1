@@ -648,6 +648,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <button class="nav-btn active" id="nav-map" onclick="switchView('map')"><span class="nav-icon">🗺</span>Map</button>
     <button class="nav-btn" id="nav-board" onclick="switchView('board')"><span class="nav-icon">📋</span>Board</button>
     <button class="nav-btn" id="nav-add" onclick="openAddRecord()" style="color:#2c5f3e;"><span class="nav-icon">➕</span>Add</button>
+    <button class="nav-btn admin-only" id="nav-users" onclick="openAdminModal()" style="display:none;color:#555;"><span class="nav-icon">👥</span>Users</button>
     <button class="nav-btn" id="nav-select" onclick="toggleLasso()"><span class="nav-icon">✏️</span>Select</button>
     <button class="nav-btn" id="nav-settings" onclick="showSettings()"><span class="nav-icon">⇥</span>Log out</button>
   </div>
@@ -795,10 +796,10 @@ function doLogin(){
 function startApp(){
   document.getElementById('script-url').value=APP_SCRIPT_URL;
   document.getElementById('api-key').value=APP_MAPS_KEY;
-  // Show/hide admin-only elements
-  if(currentUser && currentUser.role==='admin'){
-    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
-  }
+  // Show/hide admin-only elements — only admin sees Users button
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    el.style.display = (currentUser&&currentUser.role==='admin') ? '' : 'none';
+  });
   loadApp();
 }
 
@@ -1188,16 +1189,26 @@ function renderNotesPanel(contactName){
   if(!list) return;
   const notes=notesCache[contactName]||[];
   if(!notes.length){ list.innerHTML='<div class="notes-empty">No notes yet</div>'; return; }
-  const canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='standard');
-  list.innerHTML=notes.slice().reverse().map(n=>`
-    <div class="note-item">
+  const isAdmin=currentUser&&currentUser.role==='admin';
+  const canWrite=currentUser&&(currentUser.role==='admin'||currentUser.role==='standard');
+  list.innerHTML=notes.slice().reverse().map(n=>{
+    // Match author by username OR display name (handles both old and new notes)
+    const isOwner=currentUser&&(
+      n.author===currentUser.username||
+      n.author===currentUser.name||
+      n.authorName===currentUser.name
+    );
+    const canEditNote=canWrite&&isOwner;
+    const canDeleteNote=isAdmin||isOwner;
+    return `<div class="note-item">
       <div class="note-meta"><span class="note-author">${esc(n.authorName||n.author)}</span><span class="note-time">${esc(n.timestamp)}</span></div>
       <div class="note-text">${esc(n.text)}</div>
-      ${(canEdit&&n.author===currentUser.username)||(currentUser&&currentUser.role==='admin')?`<div class="note-actions">
-        ${canEdit&&n.author===currentUser.username?`<button class="note-edit-btn" onclick="editNote('${n.noteId}','${esc(contactName)}')">✎ Edit</button>`:''}
-        <button class="note-delete-btn" onclick="deleteNote('${n.noteId}','${esc(contactName)}')">🗑 Delete</button>
+      ${canEditNote||canDeleteNote?`<div class="note-actions">
+        ${canEditNote?`<button class="note-edit-btn" onclick="editNote('${n.noteId}','${esc(contactName)}')">✎ Edit</button>`:''}
+        ${canDeleteNote?`<button class="note-delete-btn" onclick="deleteNote('${n.noteId}','${esc(contactName)}')">🗑 Delete</button>`:''}
       </div>`:''}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function editNote(noteId,contactName){
