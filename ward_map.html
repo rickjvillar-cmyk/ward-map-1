@@ -274,6 +274,67 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .edit-modal-save:hover { background: #1e4a2e; }
 .edit-modal-cancel { padding: 11px 18px; background: #f5f4f0; color: #555; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; cursor: pointer; }
 
+/* ── Notes ── */
+.notes-panel { padding: 0 14px 14px; }
+.notes-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 0 8px; border-top: 1px solid #f0efe9; }
+.notes-title { font-size: 12px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+.add-note-btn { font-size: 12px; font-weight: 600; color: #2c5f3e; background: none; border: none; cursor: pointer; padding: 3px 0; }
+.add-note-btn:disabled { color: #aaa; cursor: not-allowed; }
+.note-compose { margin-bottom: 10px; }
+.note-compose textarea { width: 100%; padding: 9px 11px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 70px; outline: none; color: #111; background: #fafaf8; line-height: 1.5; }
+.note-compose textarea:focus { border-color: #4a7c5e; background: #fff; }
+.note-compose-btns { display: flex; gap: 8px; margin-top: 6px; }
+.note-save-btn { padding: 7px 16px; background: #2c5f3e; color: #fff; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.note-cancel-btn { padding: 7px 12px; background: #f5f4f0; color: #555; border: 1px solid #ddd; border-radius: 7px; font-size: 12px; cursor: pointer; font-family: inherit; }
+.note-item { background: #fafaf8; border: 1px solid #eee; border-radius: 8px; padding: 10px 11px; margin-bottom: 7px; }
+.note-item:last-child { margin-bottom: 0; }
+.note-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px; flex-wrap: wrap; }
+.note-author { font-size: 11px; font-weight: 600; color: #2c5f3e; }
+.note-time { font-size: 10px; color: #bbb; }
+.note-text { font-size: 12px; color: #333; line-height: 1.5; }
+.note-actions { display: flex; gap: 8px; margin-top: 5px; }
+.note-edit-btn,.note-delete-btn { font-size: 10px; color: #aaa; background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; }
+.note-edit-btn:hover { color: #4a7c5e; }
+.note-delete-btn:hover { color: #c0392b; }
+.notes-empty { font-size: 12px; color: #ccc; text-align: center; padding: 14px 0; }
+.card-note-count { font-size: 10px; font-weight: 600; color: #888; background: #f0efe9; padding: 1px 7px; border-radius: 20px; cursor: pointer; white-space: nowrap; margin-left: 4px; }
+.card-note-count:hover { background: #e0ddd5; }
+.card-note-count.has-notes { background: #edf7f0; color: #2c5f3e; }
+
+/* ── User Management ── */
+#admin-modal { position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,0.45); display: none; align-items: flex-start; justify-content: center; padding: 20px 16px; overflow-y: auto; }
+#admin-modal.open { display: flex; }
+.admin-card { background: #fff; border-radius: 16px; width: 100%; max-width: 700px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); margin: auto; overflow: hidden; }
+.admin-header { padding: 18px 22px 16px; border-bottom: 1px solid #f0efe9; display: flex; align-items: center; justify-content: space-between; }
+.admin-header h2 { font-size: 17px; font-weight: 600; color: #111; }
+.admin-close { background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; }
+.admin-toolbar { padding: 12px 16px; border-bottom: 1px solid #f0efe9; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.admin-search { flex: 1; min-width: 140px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; }
+.admin-filter { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; background: #fff; }
+.admin-add-btn { padding: 8px 14px; background: #2c5f3e; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.admin-add-btn:hover { background: #1e4a2e; }
+.users-table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+.users-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+.users-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #f0efe9; background: #fafaf9; position: sticky; top: 0; }
+.users-table td { padding: 11px 14px; font-size: 13px; color: #333; border-bottom: 1px solid #f5f5f3; vertical-align: middle; }
+.users-table tr:last-child td { border-bottom: none; }
+.users-table tr:hover td { background: #fafaf8; }
+.status-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+.status-active { background: #edf7f0; color: #2e7d32; }
+.status-deactivated { background: #fff5f5; color: #c0392b; }
+.role-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; background: #f0efe9; color: #555; }
+.user-action-btn { padding: 4px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 11px; font-weight: 500; cursor: pointer; background: #fff; font-family: inherit; margin-right: 4px; }
+.user-action-btn:hover { background: #f5f4f0; }
+.no-users { text-align: center; padding: 32px; color: #bbb; font-size: 13px; }
+#user-form-modal { position: fixed; inset: 0; z-index: 6000; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; padding: 20px; }
+#user-form-modal.open { display: flex; }
+.user-form-card { background: #fff; border-radius: 14px; padding: 24px; width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+.user-form-title { font-size: 16px; font-weight: 600; color: #111; margin-bottom: 16px; }
+.user-form-field { margin-bottom: 13px; }
+.user-form-field label { display: block; font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.user-form-field input,.user-form-field select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; color: #111; background: #fafaf8; outline: none; }
+.user-form-field input:focus,.user-form-field select:focus { border-color: #4a7c5e; }
+
 /* Save toast */
 #save-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #1a1a1a; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.2); white-space: nowrap; }
 #save-toast.show { display: block; }
@@ -360,12 +421,29 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <!-- Edit Modal -->
 <div id="edit-modal">
-  <div class="edit-modal-card">
+  <div class="edit-modal-card" style="max-height:90vh;overflow-y:auto;">
     <div class="edit-modal-title" id="edit-modal-title">Edit</div>
     <div id="edit-modal-body"></div>
-    <div class="edit-modal-btns">
+    <div class="edit-modal-btns" id="edit-modal-btns">
       <button class="edit-modal-cancel" onclick="closeEditModal()">Cancel</button>
       <button class="edit-modal-save" id="edit-modal-save" onclick="saveEdit()">Save</button>
+    </div>
+    <!-- Notes section shown when viewing a contact -->
+    <div id="edit-notes-section" style="display:none;">
+      <div class="notes-header">
+        <span class="notes-title">📝 Notes</span>
+        <button class="add-note-btn" id="add-note-btn" onclick="showNoteCompose()">+ Add note</button>
+      </div>
+      <div id="note-compose-area" style="display:none;">
+        <div class="note-compose">
+          <textarea id="note-text-input" placeholder="Write a note…" rows="3"></textarea>
+          <div class="note-compose-btns">
+            <button class="note-cancel-btn" onclick="hideNoteCompose()">Cancel</button>
+            <button class="note-save-btn" onclick="submitNote()">Save note</button>
+          </div>
+        </div>
+      </div>
+      <div id="notes-list"></div>
     </div>
   </div>
 </div>
@@ -430,6 +508,59 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   </div>
 </div>
 
+<!-- Admin / User Management Modal -->
+<div id="admin-modal">
+  <div class="admin-card">
+    <div class="admin-header">
+      <h2>👥 User Management</h2>
+      <button class="admin-close" onclick="closeAdminModal()">✕</button>
+    </div>
+    <div class="admin-toolbar">
+      <input class="admin-search" id="admin-search" type="text" placeholder="Search name or username…" oninput="renderUsersTable()"/>
+      <select class="admin-filter" id="admin-filter" onchange="renderUsersTable()">
+        <option value="all">All users</option>
+        <option value="active">Active</option>
+        <option value="deactivated">Deactivated</option>
+
+      </select>
+      <button class="admin-add-btn" onclick="openUserForm()">+ Add User</button>
+    </div>
+    <div class="users-table-wrap">
+      <table class="users-table">
+        <thead><tr>
+          <th>Name</th><th>Username</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- User Form Modal -->
+<div id="user-form-modal">
+  <div class="user-form-card">
+    <div class="user-form-title" id="user-form-title">Add User</div>
+    <div class="user-form-field">
+      <label>Name *</label>
+      <input type="text" id="uf-name" placeholder="Full name"/>
+    </div>
+    <div class="user-form-field">
+      <label>Username *</label>
+      <input type="text" id="uf-username" placeholder="username" autocapitalize="none"/>
+    </div>
+    <div class="user-form-field">
+      <label>Password *</label>
+      <input type="text" id="uf-password" placeholder="password"/>
+    </div>
+    <!-- Role is always standard for new users; cw is always admin -->
+    <div id="uf-error" style="display:none;font-size:12px;color:#c0392b;background:#fff5f5;border:1px solid #fcc;border-radius:8px;padding:8px 12px;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeUserForm()" style="padding:10px 16px;background:#f5f4f0;color:#555;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+      <button onclick="saveUserForm()" style="flex:1;padding:10px;background:#2c5f3e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- App -->
 <div id="app">
   <div id="topbar">
@@ -440,6 +571,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
         <button class="view-tab active" id="tab-map" onclick="switchView('map')">🗺 Map</button>
         <button class="view-tab" id="tab-board" onclick="switchView('board')">📋 Board</button>
       </div>
+      <button class="tb-btn admin-only" id="admin-btn" onclick="openAdminModal()" style="display:none;background:transparent;border:1px solid #ddd;color:#555;">👥 Users</button>
       <button class="tb-btn" id="add-btn" onclick="openAddRecord()" style="background:#2c5f3e;color:#fff;">+ Add Record</button>
       <button class="tb-btn" id="lasso-btn" onclick="toggleLasso()">✏️ <span class="lasso-label">Select</span></button>
       <button class="tb-btn" id="refresh-btn" onclick="refreshData()">↺ Refresh</button>
@@ -520,11 +652,9 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEStTmqBsM8bbvZrrVW7P-PKGYmySxcTjs0Qk9t-O0-Z-HStnS0NKyH2Y6BiCXMsri-Q/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkwP5LH26zrqyrm76dihbET6fcmSN8mlJ4K0DwB5n48gQtLGZFA_hmTolcw8viAGoTUQ/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
-const USERS = {
-  'cw': 'cw2026',
-};
+// Legacy USERS removed — now managed via getUsers() / saveUsers()
 const SK_SCRIPT='wardmap_script_url', SK_API='wardmap_api_key';
 const STATUS_CONFIG=[
   {key:'active',      label:'Active',      color:'#2e7d32'},
@@ -551,41 +681,112 @@ let visibleStatuses=new Set(['Active','Inactive','Less Active',"Don't Know"]);
 let visibleDistricts=new Set(['District 1','District 2','District 3','']);
 let dragSrcPerson=null;
 
+// ── User Management ──
+const USERS_SHEET_GID = '0'; // will be updated with actual GID
+let usersCache = null; // loaded from sheet
+
+function getUsers(){
+  if(usersCache) return usersCache;
+  // Fallback default while loading
+  return {'cw':{name:'Admin',username:'cw',password:'dc4',role:'admin',status:'active'}};
+}
+
+function saveUsers(users){ usersCache = users; }
+
+async function loadUsers(){
+  try{
+    const cbName='__users_load_'+Date.now();
+    const url=`https://docs.google.com/spreadsheets/d/1P6mKsfULU7d4_1QAopJYmdowJRupJkfv94iZwS0RiyQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&sheet=Users`;
+    const data=await new Promise((resolve,reject)=>{
+      const timeout=setTimeout(()=>{delete window[cbName];s.remove();reject();},8000);
+      window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+      const s=document.createElement('script');
+      s.src=url;
+      s.onerror=()=>{clearTimeout(timeout);delete window[cbName];reject();};
+      document.head.appendChild(s);
+    });
+    const users={};
+    if(data&&data.table&&data.table.rows){
+      data.table.rows.forEach((row,idx)=>{
+        if(!row.c||!row.c[1]) return;
+        // Columns: User (display name) | Username | Password | Status
+        const name    =row.c[0]?String(row.c[0].v||'').trim():'';
+        const username=row.c[1]?String(row.c[1].v||'').trim().toLowerCase():'';
+        const password=row.c[2]?String(row.c[2].v||'').trim():'';
+        const status  =row.c[3]?String(row.c[3].v||'').trim().toLowerCase():'active';
+        // cw is always admin, everyone else standard
+        const role = username==='cw'?'admin':'standard';
+        if(!username) return;
+        users[username]={name,username,password,role,status,rowIndex:idx+2};
+      });
+    }
+    usersCache=users;
+    return users;
+  }catch(e){
+    console.warn('Users load failed:',e);
+    return getUsers();
+  }
+}
+
+let currentUser = null; // {username, name, role}
+
 // ── Login ──
 window.addEventListener('DOMContentLoaded',()=>{
-  // If already logged in this session, skip login
-  if(sessionStorage.getItem('wardmap_auth')==='1'){
-    startApp();
-  }
-  // Focus username field
+  const saved = sessionStorage.getItem('wardmap_current_user');
+  if(saved){ try{ currentUser=JSON.parse(saved); startApp(); return; }catch(e){} }
+  // Pre-load users from sheet for faster login
+  loadUsers();
   setTimeout(()=>{const u=document.getElementById('login-user');if(u)u.focus();},100);
 });
 
 function doLogin(){
-  const user=document.getElementById('login-user').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  const errEl=document.getElementById('login-error');
-  if(USERS[user]&&USERS[user]===pass){
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const pass     = document.getElementById('login-pass').value;
+  const errEl    = document.getElementById('login-error');
+  const users    = getUsers();
+  const u        = users[username];
+  if(u && u.password===pass && u.status!=='deactivated'&&u.status!=='Deactivated'){
     errEl.style.display='none';
-    sessionStorage.setItem('wardmap_auth','1');
+    currentUser = {username, name:u.name, role:u.role};
+    sessionStorage.setItem('wardmap_current_user', JSON.stringify(currentUser));
     document.getElementById('login-screen').style.display='none';
     startApp();
-  } else {
+  } else if(u && (u.status==='deactivated'||u.status==='Deactivated')){
+    errEl.textContent='Your account has been deactivated.';
     errEl.style.display='block';
-    document.getElementById('login-pass').value='';
-    document.getElementById('login-pass').focus();
+  } else {
+    // If users not loaded yet from sheet, try loading then re-checking
+    loadUsers().then(freshUsers=>{
+      const fu=freshUsers[username];
+      if(fu && fu.password===pass && fu.status!=='deactivated'&&fu.status!=='Deactivated'){
+        errEl.style.display='none';
+        currentUser={username,name:fu.name,role:fu.role};
+        sessionStorage.setItem('wardmap_current_user',JSON.stringify(currentUser));
+        document.getElementById('login-screen').style.display='none';
+        startApp();
+      } else {
+        errEl.textContent='Incorrect username or password';
+        errEl.style.display='block';
+        document.getElementById('login-pass').value='';
+        document.getElementById('login-pass').focus();
+      }
+    });
   }
 }
 
 function startApp(){
-  // Use hardcoded credentials — users never see these
   document.getElementById('script-url').value=APP_SCRIPT_URL;
   document.getElementById('api-key').value=APP_MAPS_KEY;
+  // Show/hide admin-only elements
+  if(currentUser && currentUser.role==='admin'){
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
+  }
   loadApp();
 }
 
 function clearSaved(){
-  sessionStorage.removeItem('wardmap_auth');
+  sessionStorage.removeItem('wardmap_current_user');
+  currentUser = null;
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('app').style.display='none';
 }
@@ -728,6 +929,7 @@ async function fetchData(){
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
           <span style="background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${esc(label)}</span>
           <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#4a7c5e;font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">✎ Edit</button>
+          <button onclick="openNotesFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#888;font-size:11px;font-weight:500;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">📝 Notes</button>
         </div>
         <div style="font-size:12px;color:#888;line-height:1.5">${esc(fullAddr)}</div>
       </div>`);
@@ -769,7 +971,9 @@ async function fetchData(){
   document.getElementById('stats').innerHTML=statHtml;
   document.getElementById('mobile-stats').innerHTML=statHtml;
   renderBoard(allPeople);
-  hideLoading(); // ← Map shows here, user can interact immediately
+  hideLoading();
+  // Load notes in background
+  loadNotes(); // ← Map shows here, user can interact immediately
 
   // ── Phase 2: Geocode new addresses in background ──
   if(uncachedCount>0){
@@ -828,6 +1032,262 @@ function toggleDistrict(label){
     if(cb){cb.classList.add('checked');cb.classList.remove('unchecked');cb.textContent='✓';}
   }
   applyVisibility();
+}
+
+// ── Notes System ──
+const NOTES_SHEET_GID = '292852519';
+let notesCache = {};
+let notesLoaded = false;
+let currentNoteContact = null;
+let editingNoteId = null;
+
+async function loadNotes(){
+  if(notesLoaded) return;
+  try{
+    const cbName='__notes_load_'+Date.now();
+    const url=`https://docs.google.com/spreadsheets/d/1P6mKsfULU7d4_1QAopJYmdowJRupJkfv94iZwS0RiyQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&gid=${NOTES_SHEET_GID}`;
+    const data=await new Promise((resolve,reject)=>{
+      const timeout=setTimeout(()=>{delete window[cbName];s.remove();reject(new Error('timeout'));},8000);
+      window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+      const s=document.createElement('script');
+      s.src=url;
+      s.onerror=()=>{clearTimeout(timeout);delete window[cbName];reject();};
+      document.head.appendChild(s);
+    });
+    notesCache={};
+    if(data&&data.table&&data.table.rows){
+      data.table.rows.forEach((row,idx)=>{
+        if(!row.c||!row.c[0]) return;
+        // Columns: Member Name | User | Timestamp | Note ID | Note
+        const contact   = row.c[0]?String(row.c[0].v||'').trim():'';
+        const author    = row.c[1]?String(row.c[1].v||'').trim():'';
+        const timestamp = row.c[2]?String(row.c[2].v||'').trim():'';
+        const noteId    = row.c[3]?String(row.c[3].v||''):String(idx+2);
+        const text      = row.c[4]?String(row.c[4].v||'').trim():'';
+        if(!contact||!text) return;
+        // Look up display name from users
+        const users=getUsers();
+        const userObj=Object.values(users).find(u=>u.username===author||u.name===author);
+        const authorName=userObj?userObj.name:author;
+        if(!notesCache[contact]) notesCache[contact]=[];
+        notesCache[contact].push({noteId,text,author,authorName,timestamp,rowIndex:idx+2});
+      });
+    }
+    notesLoaded=true;
+  }catch(e){ console.warn('Notes load failed:',e); }
+  renderNoteCounters();
+}
+
+function getNoteCount(name){ return (notesCache[name]||[]).length; }
+
+function renderNoteCounters(){
+  document.querySelectorAll('[data-person-name]').forEach(el=>{
+    const name=el.dataset.personName;
+    const count=getNoteCount(name);
+    el.textContent=count>0?`${count} Note${count===1?'':'s'}`:'Notes';
+    el.classList.toggle('has-notes',count>0);
+  });
+}
+
+function openNotesInEditModal(person){
+  currentNoteContact=person.name;
+  currentEditPerson=person;
+  document.getElementById('edit-modal-title').textContent=esc(person.name);
+  document.getElementById('edit-modal-body').innerHTML='';
+  document.getElementById('edit-modal-btns').style.display='none';
+  document.getElementById('edit-notes-section').style.display='block';
+  document.getElementById('note-compose-area').style.display='none';
+  const canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='standard');
+  document.getElementById('add-note-btn').disabled=!canEdit;
+  renderNotesPanel(person.name);
+  document.getElementById('edit-modal').classList.add('open');
+  loadNotes().then(()=>renderNotesPanel(person.name));
+}
+
+function showNoteCompose(){
+  const canAdd=currentUser&&(currentUser.role==='admin'||currentUser.role==='standard');
+  if(!canAdd){showToast('Read-only users cannot add notes',true);return;}
+  document.getElementById('note-compose-area').style.display='block';
+  document.getElementById('note-text-input').value='';
+  editingNoteId=null;
+  document.getElementById('note-text-input').focus();
+}
+function hideNoteCompose(){ document.getElementById('note-compose-area').style.display='none'; editingNoteId=null; }
+
+async function submitNote(){
+  const text=document.getElementById('note-text-input').value.trim();
+  if(!text) return;
+  const contact=currentNoteContact;
+  const now=new Date();
+  const timestamp=now.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  const author=currentUser?currentUser.username:'unknown';
+  const authorName=currentUser?currentUser.name:'Unknown';
+  if(editingNoteId){
+    const note=(notesCache[contact]||[]).find(n=>n.noteId===editingNoteId);
+    if(!note) return;
+    await updateSheetCell(note.rowIndex, 3, text, ()=>{
+      note.text=text; hideNoteCompose(); renderNotesPanel(contact); renderNoteCounters(); showToast('✅ Note updated!');
+    });
+  } else {
+    const rowData=[contact,author,timestamp,'',text]; // Member Name|User|Timestamp|NoteID|Note
+    const cbName='__note_add_'+Date.now();
+    const params=encodeURIComponent(JSON.stringify(rowData));
+    const url=currentScriptUrl+'?action=addnote&data='+params+'&callback='+cbName;
+    const result=await new Promise(resolve=>{
+      const timeout=setTimeout(()=>{delete window[cbName];s.remove();resolve({success:false});},10000);
+      window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+      const s=document.createElement('script');s.src=url;
+      s.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve({success:false});};
+      document.head.appendChild(s);
+    });
+    if(result.success){
+      if(!notesCache[contact]) notesCache[contact]=[];
+      notesCache[contact].push({noteId:String(result.rowIndex),text,author,authorName,timestamp,rowIndex:result.rowIndex});
+      hideNoteCompose(); renderNotesPanel(contact); renderNoteCounters(); showToast('✅ Note saved!');
+    } else { showToast('❌ Failed to save note',true); }
+  }
+}
+
+function renderNotesPanel(contactName){
+  const list=document.getElementById('notes-list');
+  if(!list) return;
+  const notes=notesCache[contactName]||[];
+  if(!notes.length){ list.innerHTML='<div class="notes-empty">No notes yet</div>'; return; }
+  const canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='standard');
+  list.innerHTML=notes.slice().reverse().map(n=>`
+    <div class="note-item">
+      <div class="note-meta"><span class="note-author">${esc(n.authorName||n.author)}</span><span class="note-time">${esc(n.timestamp)}</span></div>
+      <div class="note-text">${esc(n.text)}</div>
+      ${canEdit&&n.author===currentUser.username?`<div class="note-actions">
+        <button class="note-edit-btn" onclick="editNote('${n.noteId}','${esc(contactName)}')">✎ Edit</button>
+        <button class="note-delete-btn" onclick="deleteNote('${n.noteId}','${esc(contactName)}')">🗑 Delete</button>
+      </div>`:''}
+    </div>`).join('');
+}
+
+function editNote(noteId,contactName){
+  const note=(notesCache[contactName]||[]).find(n=>n.noteId===noteId);
+  if(!note) return;
+  editingNoteId=noteId;
+  document.getElementById('note-text-input').value=note.text;
+  document.getElementById('note-compose-area').style.display='block';
+  document.getElementById('note-text-input').focus();
+}
+
+async function deleteNote(noteId,contactName){
+  if(!confirm('Delete this note?')) return;
+  const note=(notesCache[contactName]||[]).find(n=>n.noteId===noteId);
+  if(!note) return;
+  const cbName='__note_del_'+Date.now();
+  const url=currentScriptUrl+'?action=deletenote&row='+note.rowIndex+'&callback='+cbName;
+  const result=await new Promise(resolve=>{
+    const timeout=setTimeout(()=>{delete window[cbName];s.remove();resolve({success:false});},10000);
+    window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+    const s=document.createElement('script');s.src=url;
+    s.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve({success:false});};
+    document.head.appendChild(s);
+  });
+  if(result.success){
+    notesCache[contactName]=(notesCache[contactName]||[]).filter(n=>n.noteId!==noteId);
+    renderNotesPanel(contactName); renderNoteCounters(); showToast('✅ Note deleted!');
+  } else { showToast('❌ Delete failed',true); }
+}
+
+// ── User Management ──
+let editingUsername=null;
+
+function openAdminModal(){
+  if(!currentUser||currentUser.role!=='admin'){showToast('Admins only',true);return;}
+  renderUsersTable();
+  document.getElementById('admin-modal').classList.add('open');
+}
+function closeAdminModal(){ document.getElementById('admin-modal').classList.remove('open'); }
+
+function renderUsersTable(){
+  const q=(document.getElementById('admin-search').value||'').toLowerCase();
+  const filter=document.getElementById('admin-filter').value;
+  const users=getUsers();
+  const tbody=document.getElementById('users-tbody');
+  const rows=Object.entries(users).filter(([uname,u])=>{
+    const mq=!q||u.name.toLowerCase().includes(q)||uname.includes(q);
+    const mf=filter==='all'||filter===u.status||filter===u.role;
+    return mq&&mf;
+  });
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="5" class="no-users">No users found</td></tr>`;return;}
+  tbody.innerHTML=rows.map(([uname,u])=>`
+    <tr>
+      <td><strong>${esc(u.name)}</strong></td>
+      <td style="font-family:monospace;font-size:12px">${esc(uname)}</td>
+      <td><span class="status-badge ${u.status==='active'?'status-active':'status-deactivated'}">${u.status==='active'?'Active':'Deactivated'}</span></td>
+      <td>
+        <button class="user-action-btn" onclick="openUserForm('${uname}')">Edit</button>
+        ${u.status==='active'
+          ?`<button class="user-action-btn deactivate" onclick="toggleUserStatus('${uname}','deactivated')">Deactivate</button>`
+          :`<button class="user-action-btn activate" onclick="toggleUserStatus('${uname}','active')">Reactivate</button>`}
+      </td>
+    </tr>`).join('');
+}
+
+function toggleUserStatus(uname,newStatus){
+  const users=getUsers(); if(!users[uname]) return;
+  users[uname].status=newStatus;
+  // Save to sheet
+  const row=users[uname].rowIndex;
+  if(row) updateSheetCell(row, 4, newStatus, ()=>{});
+  saveUsers(users); renderUsersTable();
+  showToast(`✅ User ${newStatus==='active'?'reactivated':'deactivated'}`);
+}
+
+function openUserForm(uname=null){
+  editingUsername=uname;
+  const users=getUsers(); const u=uname?users[uname]:null;
+  document.getElementById('user-form-title').textContent=uname?'Edit User':'Add User';
+  document.getElementById('uf-name').value=u?u.name:'';
+  document.getElementById('uf-username').value=uname||'';
+  document.getElementById('uf-username').disabled=!!uname;
+  document.getElementById('uf-password').value=u?u.password:'';
+  // role is auto-assigned (cw=admin, others=standard)
+  document.getElementById('uf-error').style.display='none';
+  document.getElementById('user-form-modal').classList.add('open');
+}
+function closeUserForm(){ document.getElementById('user-form-modal').classList.remove('open'); editingUsername=null; }
+
+async function saveUserForm(){
+  const name=document.getElementById('uf-name').value.trim();
+  const uname=document.getElementById('uf-username').value.trim().toLowerCase();
+  const pass=document.getElementById('uf-password').value.trim();
+  const role=(uname==='cw')?'admin':'standard';
+  const errEl=document.getElementById('uf-error');
+  if(!name||!uname||!pass){errEl.textContent='All fields are required.';errEl.style.display='block';return;}
+  const users=getUsers();
+  if(!editingUsername&&users[uname]){errEl.textContent='Username already exists.';errEl.style.display='block';return;}
+
+  if(editingUsername){
+    // Update existing row in sheet
+    const u=users[editingUsername];
+    if(u&&u.rowIndex){
+      await updateSheetCell(u.rowIndex,1,name,()=>{});
+      await updateSheetCell(u.rowIndex,3,pass,()=>{});
+    }
+    users[editingUsername]={...users[editingUsername],name,password:pass,role};
+  } else {
+    // Add new row to Users sheet
+    const rowData=[name,uname,pass,'active'];
+    const cbName='__user_add_'+Date.now();
+    const params=encodeURIComponent(JSON.stringify(rowData));
+    const url=currentScriptUrl+'?action=adduser&data='+params+'&callback='+cbName;
+    const result=await new Promise(resolve=>{
+      const timeout=setTimeout(()=>{delete window[cbName];s.remove();resolve({success:false});},10000);
+      window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+      const s=document.createElement('script');s.src=url;
+      s.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve({success:false});};
+      document.head.appendChild(s);
+    });
+    if(!result.success){errEl.textContent='Failed to save user.';errEl.style.display='block';return;}
+    users[uname]={name,username:uname,password:pass,role,status:'active',rowIndex:result.rowIndex};
+  }
+  saveUsers(users); closeUserForm(); renderUsersTable();
+  showToast(`✅ User ${editingUsername?'updated':'added'}!`);
 }
 
 function applyVisibility(){
@@ -920,16 +1380,22 @@ function renderBoard(people){
         <div class="card-actions">
           ${p.latLng?`<span class="card-action-link view-map-link">↗ View on map</span>`:''}
           <span class="card-action-link edit-contact-link">✎ Edit contact</span>
+          <span class="card-note-count has-notes" data-person-name="${esc(p.name)}">Notes</span>
         </div>`;
 
       // Wire up action links after innerHTML is set
       const viewLink=card.querySelector('.view-map-link');
       const editLink=card.querySelector('.edit-contact-link');
+      const notesLink=card.querySelector('.card-note-count');
       if(viewLink) viewLink.addEventListener('click',e=>{e.stopPropagation();focusOnMap(p.name);});
       if(editLink) editLink.addEventListener('click',e=>{
         e.stopPropagation();
         const rect=editLink.getBoundingClientRect();
         showEditMenu(p,rect.left,rect.bottom+4);
+      });
+      if(notesLink) notesLink.addEventListener('click',e=>{
+        e.stopPropagation();
+        openNotesInEditModal(p);
       });
 
       // Desktop drag
@@ -1053,6 +1519,8 @@ function openEditModal(mode){
     saveBtn.style.background = '#c0392b';
   }
   modal.classList.add('open');
+  document.getElementById('edit-notes-section').style.display='none';
+  document.getElementById('edit-modal-btns').style.display='flex';
 }
 
 function closeEditModal(){
@@ -1365,6 +1833,7 @@ function updateLoading(t,p){document.getElementById('loading-text').textContent=
 function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
 function showError(msg){hideLoading();document.getElementById('setup-screen').style.display='flex';document.getElementById('app').style.display='none';const e=document.getElementById('error-msg');e.textContent=msg;e.style.display='block';}
 function refreshData(){fetchData();}
+function openNotesFromMap(idx){infoWindow.close();const person=allPeople[idx];if(!person)return;openNotesInEditModal(person);}
 function showSettings(){if(confirm('Sign out of Ward Map?')){clearSaved();}}
 </script>
 </body>
