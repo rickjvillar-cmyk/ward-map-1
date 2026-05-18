@@ -886,7 +886,7 @@ async function fetchData(){
   if(!rows||rows.length<2){showError('Sheet appears empty.');return;}
   const headers=rows[0].map(h=>String(h||'').trim().toLowerCase());
   const col=n=>headers.indexOf(n);
-  const iName=col('name'),iStatus=col('status'),iAddr=col('address');
+  const iName=col('name')>=0?col('name'):col('member name'),iStatus=col('status'),iAddr=col('address');
   const iApt=col('apt/unit')>=0?col('apt/unit'):col('apt')>=0?col('apt'):col('unit');
   const iCity=col('city'),iState=col('state'),iZip=col('zip'),iDistrict=col('district');
   if(iName<0||iStatus<0||iAddr<0){showError('Missing columns. Row 1 must have: Name | Status | Address\n\nFound: '+headers.join(', '));return;}
