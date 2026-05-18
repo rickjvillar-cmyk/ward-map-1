@@ -655,7 +655,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1SySiV8z9JWMQtS0mawySBfKGRgVv5LOlxqmTqVwyLFH4G7uEUJdekNg2aATKSUD4Zg/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybBWFbDiICV3Wsr8qN6XQNJu3R5FEKePF6CoIIHCPg8i01jVd-oqPIh4FU_6Gng1OLug/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
 // Legacy USERS removed — now managed via getUsers() / saveUsers()
 const SK_SCRIPT='wardmap_script_url', SK_API='wardmap_api_key';
@@ -1262,9 +1262,15 @@ function renderUsersTable(){
 function toggleUserStatus(uname,newStatus){
   const users=getUsers(); if(!users[uname]) return;
   users[uname].status=newStatus;
-  // Save to sheet
+  // Update Status column (col 5) in Users sheet
   const row=users[uname].rowIndex;
-  if(row) updateSheetCell(row, 5, newStatus, ()=>{});
+  if(row){
+    const cbName='__user_status_'+Date.now();
+    const url=currentScriptUrl+'?action=updateuser&row='+row+'&col=5&value='+encodeURIComponent(newStatus)+'&callback='+cbName;
+    const s=document.createElement('script');
+    window[cbName]=(d)=>{delete window[cbName];s.remove();};
+    s.src=url; document.head.appendChild(s);
+  }
   saveUsers(users); renderUsersTable();
   showToast(`✅ User ${newStatus==='active'?'reactivated':'deactivated'}`);
 }
