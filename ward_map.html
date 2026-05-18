@@ -574,12 +574,12 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
         <button class="view-tab active" id="tab-map" onclick="switchView('map')">🗺 Map</button>
         <button class="view-tab" id="tab-board" onclick="switchView('board')">📋 Board</button>
       </div>
-      <button class="tb-btn admin-only" id="admin-btn" onclick="openAdminModal()" style="display:none;background:transparent;border:1px solid #ddd;color:#555;">👥 Users</button>
+      <button class="tb-btn admin-only" id="admin-btn" onclick="openAdminModal()" style="display:none;background:transparent;border:1px solid #ddd;color:#555;" class="desktop-only">👥 Users</button>
       <button class="tb-btn" id="add-btn" onclick="openAddRecord()" style="background:#2c5f3e;color:#fff;">+ Add Record</button>
       <button class="tb-btn" id="lasso-btn" onclick="toggleLasso()">✏️ <span class="lasso-label">Select</span></button>
       <button class="tb-btn" id="refresh-btn" onclick="refreshData()">↺ Refresh</button>
       <button class="tb-btn" id="settings-btn" onclick="showSettings()">⇥ Log out</button>
-      <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn,#add-btn{display:none!important;}}</style>
+      <style>@media(max-width:639px){#lasso-btn,#refresh-btn,#settings-btn,#add-btn,#admin-btn{display:none!important;}}</style>
     </div>
   </div>
   <div id="filter-bar">
@@ -1083,19 +1083,23 @@ async function loadNotes(forceRefresh=false){
         // Columns: Member Name | User | Timestamp | Note
         const contact   = row.c[0]?String(row.c[0].v||'').trim():'';
         const author    = row.c[1]?String(row.c[1].v||'').trim():'';
-        const tsRaw = row.c[2]?row.c[2].v:'';
+        const tsCell = row.c[2];
         let timestamp = '';
-        if(tsRaw){
+        if(tsCell){
           try{
-            // Google Sheets returns Date(year,month,day,h,m,s) — parse it
-            if(String(tsRaw).startsWith('Date(')){
+            const tsRaw = tsCell.v || '';
+            const tsFmt = tsCell.f || '';
+            if(tsFmt){
+              // Use Google's pre-formatted value if available
+              timestamp = tsFmt;
+            } else if(String(tsRaw).startsWith('Date(')){
               const parts=String(tsRaw).replace('Date(','').replace(')','').split(',').map(Number);
               const d=new Date(parts[0],parts[1],parts[2],parts[3]||0,parts[4]||0);
               timestamp=d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
-            } else {
+            } else if(tsRaw){
               timestamp=String(tsRaw).trim();
             }
-          }catch(e){ timestamp=String(tsRaw).trim(); }
+          }catch(e){ timestamp=String(tsCell.v||'').trim(); }
         }
         const noteId    = String(idx+2);
         const text      = row.c[3]?String(row.c[3].v||'').trim():'';
