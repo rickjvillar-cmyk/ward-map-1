@@ -658,7 +658,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoRXw3aGeW2U1Kx6OgDmnUc3bqlfpE7HsyYzR5OaBypI1-s0FSqercoDAEan9qnA7e1g/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWb80ume2blTdEH-nbHC-Don-8ELQ2VSQCiUbj_DyisUZ_j7a3K_qtymKUzuSSozq-sw/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
 // Legacy USERS removed — now managed via getUsers() / saveUsers()
 const SK_SCRIPT='wardmap_script_url', SK_API='wardmap_api_key';
@@ -1186,9 +1186,25 @@ async function submitNote(){
   if(editingNoteId){
     const note=(notesCache[contact]||[]).find(n=>n.noteId===editingNoteId);
     if(!note) return;
-    await updateSheetCell(note.rowIndex, 4, text, ()=>{
-      note.text=text; hideNoteCompose(); renderNotesPanel(contact); renderNoteCounters(); showToast('✅ Note updated!');
+    // Update note in Notes sheet (not Households sheet)
+    const cbName='__note_edit_'+Date.now();
+    const url=currentScriptUrl+'?action=updatenote&row='+note.rowIndex+'&value='+encodeURIComponent(text)+'&callback='+cbName;
+    const result=await new Promise(resolve=>{
+      const timeout=setTimeout(()=>{delete window[cbName];s.remove();resolve({success:false});},10000);
+      window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+      const s=document.createElement('script');s.src=url;
+      s.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve({success:false});};
+      document.head.appendChild(s);
     });
+    if(result.success){
+      note.text=text;
+      hideNoteCompose();
+      renderNotesPanel(contact);
+      renderNoteCounters();
+      showToast('✅ Note updated!');
+    } else {
+      showToast('❌ Failed to update note',true);
+    }
   } else {
     const rowData=[contact,authorName,timestamp,text]; // Member Name|User|Timestamp|Note
     const cbName='__note_add_'+Date.now();
