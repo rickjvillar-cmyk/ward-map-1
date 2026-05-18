@@ -531,7 +531,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div class="users-table-wrap">
       <table class="users-table">
         <thead><tr>
-          <th>Name</th><th>Username</th><th>Status</th><th>Actions</th>
+          <th>Name</th><th>Username</th><th>Password</th><th>Status</th><th>Actions</th>
         </tr></thead>
         <tbody id="users-tbody"></tbody>
       </table>
@@ -655,7 +655,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3qo2AYcB06QX5S0mbv6xytJ_tFdvYRkL3iLxtpswi6NgefwZ-pNWsqjJFlAym8fYPg/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1SySiV8z9JWMQtS0mawySBfKGRgVv5LOlxqmTqVwyLFH4G7uEUJdekNg2aATKSUD4Zg/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
 // Legacy USERS removed — now managed via getUsers() / saveUsers()
 const SK_SCRIPT='wardmap_script_url', SK_API='wardmap_api_key';
@@ -1076,7 +1076,20 @@ async function loadNotes(){
         // Columns: Member Name | User | Timestamp | Note
         const contact   = row.c[0]?String(row.c[0].v||'').trim():'';
         const author    = row.c[1]?String(row.c[1].v||'').trim():'';
-        const timestamp = row.c[2]?String(row.c[2].v||'').trim():'';
+        const tsRaw = row.c[2]?row.c[2].v:'';
+        let timestamp = '';
+        if(tsRaw){
+          try{
+            // Google Sheets returns Date(year,month,day,h,m,s) — parse it
+            if(String(tsRaw).startsWith('Date(')){
+              const parts=String(tsRaw).replace('Date(','').replace(')','').split(',').map(Number);
+              const d=new Date(parts[0],parts[1],parts[2],parts[3]||0,parts[4]||0);
+              timestamp=d.toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+            } else {
+              timestamp=String(tsRaw).trim();
+            }
+          }catch(e){ timestamp=String(tsRaw).trim(); }
+        }
         const noteId    = String(idx+2);
         const text      = row.c[3]?String(row.c[3].v||'').trim():'';
         if(!contact||!text) return;
@@ -1107,13 +1120,14 @@ function renderNoteCounters(){
 function openNotesInEditModal(person){
   currentNoteContact=person.name;
   currentEditPerson=person;
-  document.getElementById('edit-modal-title').textContent=esc(person.name);
+  document.getElementById('edit-modal-title').textContent=person.name;
   document.getElementById('edit-modal-body').innerHTML='';
   document.getElementById('edit-modal-btns').style.display='none';
   document.getElementById('edit-notes-section').style.display='block';
   document.getElementById('note-compose-area').style.display='none';
   const canEdit=currentUser&&(currentUser.role==='admin'||currentUser.role==='standard');
   document.getElementById('add-note-btn').disabled=!canEdit;
+
   renderNotesPanel(person.name);
   document.getElementById('edit-modal').classList.add('open');
   loadNotes().then(()=>renderNotesPanel(person.name));
@@ -1173,8 +1187,8 @@ function renderNotesPanel(contactName){
     <div class="note-item">
       <div class="note-meta"><span class="note-author">${esc(n.authorName||n.author)}</span><span class="note-time">${esc(n.timestamp)}</span></div>
       <div class="note-text">${esc(n.text)}</div>
-      ${canEdit&&n.author===currentUser.username?`<div class="note-actions">
-        <button class="note-edit-btn" onclick="editNote('${n.noteId}','${esc(contactName)}')">✎ Edit</button>
+      ${(canEdit&&n.author===currentUser.username)||(currentUser&&currentUser.role==='admin')?`<div class="note-actions">
+        ${canEdit&&n.author===currentUser.username?`<button class="note-edit-btn" onclick="editNote('${n.noteId}','${esc(contactName)}')">✎ Edit</button>`:''}
         <button class="note-delete-btn" onclick="deleteNote('${n.noteId}','${esc(contactName)}')">🗑 Delete</button>
       </div>`:''}
     </div>`).join('');
@@ -1233,12 +1247,14 @@ function renderUsersTable(){
     <tr>
       <td><strong>${esc(u.name)}</strong></td>
       <td style="font-family:monospace;font-size:12px">${esc(uname)}</td>
+      <td style="font-family:monospace;font-size:12px">${esc(u.password)}</td>
       <td><span class="status-badge ${u.status==='active'?'status-active':'status-deactivated'}">${u.status==='active'?'Active':'Deactivated'}</span></td>
       <td>
         <button class="user-action-btn" onclick="openUserForm('${uname}')">Edit</button>
         ${u.status==='active'
           ?`<button class="user-action-btn deactivate" onclick="toggleUserStatus('${uname}','deactivated')">Deactivate</button>`
           :`<button class="user-action-btn activate" onclick="toggleUserStatus('${uname}','active')">Reactivate</button>`}
+        ${uname!=='cw'?`<button class="user-action-btn" onclick="deleteUser('${uname}')" style="color:#c0392b;border-color:#fcc;">Delete</button>`:''}
       </td>
     </tr>`).join('');
 }
@@ -1265,6 +1281,28 @@ function openUserForm(uname=null){
   document.getElementById('uf-error').style.display='none';
   document.getElementById('user-form-modal').classList.add('open');
 }
+async function deleteUser(uname){
+  if(!confirm(`Delete user "${uname}"? This cannot be undone.`)) return;
+  const users=getUsers();
+  const u=users[uname];
+  if(!u) return;
+  if(u.rowIndex){
+    const cbName='__user_del_'+Date.now();
+    const url=currentScriptUrl+'?action=deleteuser&row='+u.rowIndex+'&callback='+cbName;
+    await new Promise(resolve=>{
+      const timeout=setTimeout(()=>{delete window[cbName];s.remove();resolve();},10000);
+      window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
+      const s=document.createElement('script');s.src=url;
+      s.onerror=()=>{clearTimeout(timeout);delete window[cbName];resolve();};
+      document.head.appendChild(s);
+    });
+  }
+  delete users[uname];
+  saveUsers(users);
+  renderUsersTable();
+  showToast('✅ User deleted!');
+}
+
 function closeUserForm(){ document.getElementById('user-form-modal').classList.remove('open'); editingUsername=null; }
 
 async function saveUserForm(){
