@@ -567,7 +567,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 <!-- App -->
 <div id="app">
   <div id="topbar">
-    <h1>📍 Constitution Ward Map</h1>
+    <div>
+      <h1>📍 Constitution Ward Map</h1>
+      <div id="topbar-username" style="font-size:11px;color:#888;font-weight:400;margin-top:1px;"></div>
+    </div>
     <div class="topbar-right">
       <div id="stats"></div>
       <div class="view-tabs">
@@ -797,6 +800,9 @@ function doLogin(){
 function startApp(){
   document.getElementById('script-url').value=APP_SCRIPT_URL;
   document.getElementById('api-key').value=APP_MAPS_KEY;
+  // Show logged-in user name in topbar
+  const unEl=document.getElementById('topbar-username');
+  if(unEl&&currentUser) unEl.textContent='👤 '+currentUser.name;
   // Show/hide admin-only elements — only admin sees Users button
   document.querySelectorAll('.admin-only').forEach(el=>{
     el.style.display = (currentUser&&currentUser.role==='admin') ? '' : 'none';
