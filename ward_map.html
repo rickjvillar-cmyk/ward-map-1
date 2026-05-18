@@ -730,7 +730,8 @@ async function loadUsers(){
         const password=row.c[2]?String(row.c[2].v||'').trim():'';
         const role    =username==='cw'?'admin':(row.c[3]?String(row.c[3].v||'').trim().toLowerCase():'standard');
         const status  =row.c[4]?String(row.c[4].v||'').trim().toLowerCase():'active';
-        if(!username) return;
+        // Skip header row or empty usernames
+        if(!username||username==='username') return;
         users[username]={name,username,password,role,status,rowIndex:idx+2};
       });
     }
