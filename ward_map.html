@@ -420,7 +420,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 <div id="edit-menu"></div>
 
 <!-- Edit Modal -->
-<div id="edit-modal">
+<div id="edit-modal" onclick="if(event.target===this)closeEditModal()">
   <div class="edit-modal-card" style="max-height:90vh;overflow-y:auto;">
     <div class="edit-modal-title" id="edit-modal-title">Edit</div>
     <div id="edit-modal-body"></div>
@@ -432,7 +432,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div id="edit-notes-section" style="display:none;">
       <div class="notes-header">
         <span class="notes-title">📝 Notes</span>
-        <button class="add-note-btn" id="add-note-btn" onclick="showNoteCompose()">+ Add note</button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="add-note-btn" id="add-note-btn" onclick="showNoteCompose()">+ Add note</button>
+          <button onclick="closeEditModal()" style="background:none;border:none;font-size:18px;color:#aaa;cursor:pointer;line-height:1;padding:0;">✕</button>
+        </div>
       </div>
       <div id="note-compose-area" style="display:none;">
         <div class="note-compose">
@@ -1070,12 +1073,12 @@ async function loadNotes(){
     if(data&&data.table&&data.table.rows){
       data.table.rows.forEach((row,idx)=>{
         if(!row.c||!row.c[0]) return;
-        // Columns: Member Name | User | Timestamp | Note ID | Note
+        // Columns: Member Name | User | Timestamp | Note
         const contact   = row.c[0]?String(row.c[0].v||'').trim():'';
         const author    = row.c[1]?String(row.c[1].v||'').trim():'';
         const timestamp = row.c[2]?String(row.c[2].v||'').trim():'';
-        const noteId    = row.c[3]?String(row.c[3].v||''):String(idx+2);
-        const text      = row.c[4]?String(row.c[4].v||'').trim():'';
+        const noteId    = String(idx+2);
+        const text      = row.c[3]?String(row.c[3].v||'').trim():'';
         if(!contact||!text) return;
         // Look up display name from users
         const users=getUsers();
@@ -1141,7 +1144,7 @@ async function submitNote(){
       note.text=text; hideNoteCompose(); renderNotesPanel(contact); renderNoteCounters(); showToast('✅ Note updated!');
     });
   } else {
-    const rowData=[contact,author,timestamp,'',text]; // Member Name|User|Timestamp|NoteID|Note
+    const rowData=[contact,authorName,timestamp,text]; // Member Name|User|Timestamp|Note
     const cbName='__note_add_'+Date.now();
     const params=encodeURIComponent(JSON.stringify(rowData));
     const url=currentScriptUrl+'?action=addnote&data='+params+'&callback='+cbName;
