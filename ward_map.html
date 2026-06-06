@@ -852,7 +852,7 @@ async function loadApp(){
       this._path=[];
     },
     _finish: function() {
-      if(this._path.length<2) return;
+      if(this._path.length<3) return;
       this._active=false;
       const path=[...this._path];
       this._cleanup();
@@ -866,21 +866,24 @@ async function loadApp(){
     },
     _nearFirst: function(latLng) {
       if(this._path.length<3) return false;
-      // Check if click is within ~40px of first point at current zoom
-      const zoom=map.getZoom();
-      const threshold=0.0003*(1/Math.pow(2,zoom-14)); // scale with zoom
       const first=this._path[0];
-      const dlat=Math.abs(latLng.lat()-first.lat());
-      const dlng=Math.abs(latLng.lng()-first.lng());
-      return dlat<threshold&&dlng<threshold;
+      // Convert to pixels to get a consistent pixel distance regardless of zoom
+      const proj=map.getProjection();
+      if(!proj) return false;
+      const p1=proj.fromLatLngToPoint(latLng);
+      const p2=proj.fromLatLngToPoint(first);
+      const scale=Math.pow(2,map.getZoom());
+      const dx=(p1.x-p2.x)*scale;
+      const dy=(p1.y-p2.y)*scale;
+      return Math.sqrt(dx*dx+dy*dy)<30; // 30px threshold
     },
     startDrawing: function() {
       this._active=true;
       this._path=[];
       const self=this;
-      // Single click adds a point, or closes if near first point
       this._listeners.push(map.addListener('click',function(e){
         if(!self._active) return;
+        // Close if clicking near first point
         if(self._nearFirst(e.latLng)){
           self._finish(); return;
         }
@@ -891,16 +894,9 @@ async function loadApp(){
           strokeColor:'#e65100',strokeWeight:2,map:map
         });
       }));
-      // Right-click also finishes (desktop)
+      // Right-click to cancel on desktop
       this._listeners.push(map.addListener('rightclick',function(e){
         if(!self._active) return;
-        self._finish();
-      }));
-      // Double-click finishes (removes extra point from click)
-      this._listeners.push(map.addListener('dblclick',function(e){
-        if(!self._active) return;
-        e.stop();
-        if(self._path.length>0) self._path.pop();
         self._finish();
       }));
     }
