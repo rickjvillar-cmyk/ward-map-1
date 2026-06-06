@@ -855,7 +855,7 @@ function loadMapsApi(apiKey){
     if(window.google&&window.google.maps&&window.google.maps.drawing){resolve();return;}
     window.__mapsReady=resolve;
     const s=document.createElement('script');
-    s.src=`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,geometry&callback=__mapsReady`;
+    s.src=`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,geometry&v=3.58&callback=__mapsReady`;
     s.onerror=()=>reject(new Error('failed'));
     document.head.appendChild(s);
   });
