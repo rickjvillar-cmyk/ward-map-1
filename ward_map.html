@@ -855,9 +855,13 @@ async function loadApp(){
       this._active=true;
       this._path=[];
       const self=this;
-      // Click to add points
+      let lastClickTime=0;
+      // Click to add points — ignore clicks that are part of a dblclick
       this._listeners.push(map.addListener('click',function(e){
         if(!self._active) return;
+        const now=Date.now();
+        if(now-lastClickTime<400) return; // ignore rapid clicks (dblclick)
+        lastClickTime=now;
         self._path.push(e.latLng);
         if(self._polyline) self._polyline.setMap(null);
         self._polyline=new google.maps.Polyline({
@@ -866,7 +870,8 @@ async function loadApp(){
       }));
       // Double-click to finish
       this._listeners.push(map.addListener('dblclick',function(e){
-        if(!self._active||self._path.length<3) return;
+        if(!self._active||self._path.length<2) return;
+        e.stop(); // prevent map zoom
         self._active=false;
         self._cleanup();
         if(currentPolygon) currentPolygon.setMap(null);
@@ -1700,7 +1705,7 @@ async function saveEdit(){
   } else if(currentEditMode === 'district'){
     const newDistrict = document.getElementById('em-district').value;
     closeEditModal();
-    const districtColIndex = 10; // column J = 10
+    const districtColIndex = 9; // column I = 9
     await updateSheetCell(p.rowIndex, districtColIndex, newDistrict, ()=>{
       p.district = newDistrict;
       applyVisibility();
