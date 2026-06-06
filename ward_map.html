@@ -835,27 +835,59 @@ async function loadApp(){
   });
   geocoder=new google.maps.Geocoder();
   infoWindow=new google.maps.InfoWindow();
-  drawingManager=new google.maps.drawing.DrawingManager({
-    drawingMode:null,drawingControl:false,
-    polygonOptions:{fillColor:'#e65100',fillOpacity:0.15,strokeColor:'#e65100',strokeWeight:2,editable:false,zIndex:1}
-  });
-  drawingManager.setMap(map);
-  google.maps.event.addListener(drawingManager,'polygoncomplete',polygon=>{
-    if(currentPolygon)currentPolygon.setMap(null);
-    currentPolygon=polygon;
-    drawingManager.setDrawingMode(null);
-    lassoActive=false;setLassoOff();
-    computeSelection(polygon);
-  });
+  // Custom polygon drawing (replaces deprecated DrawingManager)
+  drawingManager = {
+    _active: false,
+    _path: [],
+    _polyline: null,
+    _listeners: [],
+    setDrawingMode: function(mode) {
+      this._active = (mode === 'polygon');
+      if(!this._active) this._cleanup();
+    },
+    _cleanup: function() {
+      this._listeners.forEach(l=>google.maps.event.removeListener(l));
+      this._listeners=[];
+      if(this._polyline){this._polyline.setMap(null);this._polyline=null;}
+      this._path=[];
+    },
+    startDrawing: function() {
+      this._active=true;
+      this._path=[];
+      const self=this;
+      // Click to add points
+      this._listeners.push(map.addListener('click',function(e){
+        if(!self._active) return;
+        self._path.push(e.latLng);
+        if(self._polyline) self._polyline.setMap(null);
+        self._polyline=new google.maps.Polyline({
+          path:self._path,strokeColor:'#e65100',strokeWeight:2,map:map
+        });
+      }));
+      // Double-click to finish
+      this._listeners.push(map.addListener('dblclick',function(e){
+        if(!self._active||self._path.length<3) return;
+        self._active=false;
+        self._cleanup();
+        if(currentPolygon) currentPolygon.setMap(null);
+        currentPolygon=new google.maps.Polygon({
+          paths:self._path,fillColor:'#e65100',fillOpacity:0.15,
+          strokeColor:'#e65100',strokeWeight:2,map:map
+        });
+        lassoActive=false; setLassoOff();
+        computeSelection(currentPolygon);
+      }));
+    }
+  };
   await fetchData();
 }
 
 function loadMapsApi(apiKey){
   return new Promise((resolve,reject)=>{
-    if(window.google&&window.google.maps&&window.google.maps.drawing){resolve();return;}
+    if(window.google&&window.google.maps){resolve();return;}
     window.__mapsReady=resolve;
     const s=document.createElement('script');
-    s.src=`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,geometry&v=3.56&callback=__mapsReady`;
+    s.src=`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry&callback=__mapsReady`;
     s.onerror=()=>reject(new Error('failed'));
     document.head.appendChild(s);
   });
@@ -1869,14 +1901,14 @@ function toggleLasso(){
   if(lassoActive){
     if(currentPolygon){currentPolygon.setMap(null);currentPolygon=null;}
     clearSelection();
-    drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+    drawingManager.startDrawing();
     document.getElementById('lasso-btn').classList.add('active');
     document.getElementById('lasso-btn').innerHTML='✕ <span class="lasso-label">Cancel</span>';
     document.getElementById('nav-select').classList.add('active');
     document.getElementById('lasso-hint').style.display='block';
     if(window.innerWidth<640)switchView('map');
   } else {
-    drawingManager.setDrawingMode(null);setLassoOff();
+    drawingManager._active=false;drawingManager._cleanup();setLassoOff();
   }
 }
 
@@ -1908,7 +1940,7 @@ function clearSelection(){
   if(currentPolygon){currentPolygon.setMap(null);currentPolygon=null;}
   document.getElementById('selection-panel').style.display='none';
   setLassoOff();
-  if(drawingManager)drawingManager.setDrawingMode(null);
+  if(drawingManager){drawingManager._active=false;drawingManager._cleanup();}
 }
 
 function copyToClipboard(){
