@@ -916,7 +916,7 @@ function saveCache(cache){try{localStorage.setItem(CACHE_KEY,JSON.stringify(cach
 
 async function fetchData(){
   showLoading('Reading your spreadsheet…','');
-  markers.forEach(m=>m.setMap(null));
+  markers.forEach(m=>{if(m)m.setMap(null);});
   markers=[];allPeople=[];
   if(currentPolygon){currentPolygon.setMap(null);currentPolygon=null;}
   clearSelection();
