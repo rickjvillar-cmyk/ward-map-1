@@ -629,7 +629,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
   <div id="content">
     <div id="map-view">
       <div id="map"></div>
-      <div id="lasso-hint">✏️ Click to add points · Right-click or double-click to close</div>
+      <div id="lasso-hint">✏️ Click to add points · Tap start point to close</div>
       <div id="selection-panel">
         <div id="sel-handle"></div>
         <div id="sel-header">
@@ -864,13 +864,26 @@ async function loadApp(){
       lassoActive=false; setLassoOff();
       computeSelection(currentPolygon);
     },
+    _nearFirst: function(latLng) {
+      if(this._path.length<3) return false;
+      // Check if click is within ~40px of first point at current zoom
+      const zoom=map.getZoom();
+      const threshold=0.0003*(1/Math.pow(2,zoom-14)); // scale with zoom
+      const first=this._path[0];
+      const dlat=Math.abs(latLng.lat()-first.lat());
+      const dlng=Math.abs(latLng.lng()-first.lng());
+      return dlat<threshold&&dlng<threshold;
+    },
     startDrawing: function() {
       this._active=true;
       this._path=[];
       const self=this;
-      // Single click adds a point
+      // Single click adds a point, or closes if near first point
       this._listeners.push(map.addListener('click',function(e){
         if(!self._active) return;
+        if(self._nearFirst(e.latLng)){
+          self._finish(); return;
+        }
         self._path.push(e.latLng);
         if(self._polyline) self._polyline.setMap(null);
         self._polyline=new google.maps.Polyline({
@@ -878,15 +891,15 @@ async function loadApp(){
           strokeColor:'#e65100',strokeWeight:2,map:map
         });
       }));
-      // Right-click OR double-click finishes the polygon
+      // Right-click also finishes (desktop)
       this._listeners.push(map.addListener('rightclick',function(e){
         if(!self._active) return;
         self._finish();
       }));
+      // Double-click finishes (removes extra point from click)
       this._listeners.push(map.addListener('dblclick',function(e){
         if(!self._active) return;
         e.stop();
-        // Remove the last point added by the click part of dblclick
         if(self._path.length>0) self._path.pop();
         self._finish();
       }));
