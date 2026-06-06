@@ -849,6 +849,7 @@ async function loadApp(){
       this._listeners.forEach(l=>google.maps.event.removeListener(l));
       this._listeners=[];
       if(this._polyline){this._polyline.setMap(null);this._polyline=null;}
+      if(this._firstMarker){this._firstMarker.setMap(null);this._firstMarker=null;}
       this._path=[];
     },
     _finish: function() {
@@ -867,36 +868,56 @@ async function loadApp(){
     _nearFirst: function(latLng) {
       if(this._path.length<3) return false;
       const first=this._path[0];
-      // Convert to pixels to get a consistent pixel distance regardless of zoom
-      const proj=map.getProjection();
-      if(!proj) return false;
-      const p1=proj.fromLatLngToPoint(latLng);
-      const p2=proj.fromLatLngToPoint(first);
-      const scale=Math.pow(2,map.getZoom());
-      const dx=(p1.x-p2.x)*scale;
-      const dy=(p1.y-p2.y)*scale;
-      return Math.sqrt(dx*dx+dy*dy)<30; // 30px threshold
+      // Use pixel-based distance via overlay projection
+      try{
+        const proj=map.getProjection();
+        if(proj){
+          const scale=Math.pow(2,map.getZoom());
+          const p1=proj.fromLatLngToPoint(latLng);
+          const p2=proj.fromLatLngToPoint(first);
+          const dx=(p1.x-p2.x)*scale;
+          const dy=(p1.y-p2.y)*scale;
+          return Math.sqrt(dx*dx+dy*dy)<40;
+        }
+      }catch(e){}
+      // Fallback: degree-based threshold
+      const dlat=Math.abs(latLng.lat()-first.lat());
+      const dlng=Math.abs(latLng.lng()-first.lng());
+      const zoom=map.getZoom()||15;
+      const thresh=0.002/Math.pow(2,zoom-13);
+      return dlat<thresh && dlng<thresh;
     },
     startDrawing: function() {
       this._active=true;
       this._path=[];
+      this._firstMarker=null;
       const self=this;
       this._listeners.push(map.addListener('click',function(e){
         if(!self._active) return;
         // Close if clicking near first point
         if(self._nearFirst(e.latLng)){
+          if(self._firstMarker){self._firstMarker.setMap(null);self._firstMarker=null;}
           self._finish(); return;
         }
         self._path.push(e.latLng);
+        // Show a dot on the first point after 3 points so user knows where to close
+        if(self._path.length===1){
+          self._firstMarker=new google.maps.Marker({
+            position:e.latLng,map:map,
+            icon:{path:google.maps.SymbolPath.CIRCLE,scale:7,fillColor:'#e65100',fillOpacity:1,strokeColor:'#fff',strokeWeight:2},
+            zIndex:999
+          });
+        }
         if(self._polyline) self._polyline.setMap(null);
         self._polyline=new google.maps.Polyline({
           path:[...self._path, self._path[0]],
           strokeColor:'#e65100',strokeWeight:2,map:map
         });
       }));
-      // Right-click to cancel on desktop
+      // Right-click to finish on desktop
       this._listeners.push(map.addListener('rightclick',function(e){
         if(!self._active) return;
+        if(self._firstMarker){self._firstMarker.setMap(null);self._firstMarker=null;}
         self._finish();
       }));
     }
