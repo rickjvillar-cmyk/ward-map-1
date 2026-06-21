@@ -53,8 +53,9 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 @media (max-width: 639px) { #topbar { height: auto; padding: 10px 14px 8px; } }
 #topbar h1 { font-size: 15px; font-weight: 600; color: #111; white-space: nowrap; }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
-#stats { display: none; gap: 6px; flex-wrap: wrap; }
-@media (min-width: 640px) { #stats { display: flex; } }
+#stats-stack { display: none; flex-direction: column; gap: 4px; }
+@media (min-width: 640px) { #stats-stack { display: flex; } }
+#stats, #type-stats { display: flex; gap: 6px; flex-wrap: wrap; }
 .stat-pill { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
 .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .view-tabs { display: flex; gap: 2px; background: #f0efe9; border-radius: 8px; padding: 3px; }
@@ -62,10 +63,11 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .view-tab.active { background: #fff; color: #111; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 @media (max-width: 639px) {
   .view-tabs { display: none; }
-  #stats { display: none !important; }
-  #topbar { flex-wrap: wrap; }
-  #topbar h1 { width: 100%; font-size: 14px; }
+  #stats-stack { display: none !important; }
+  #topbar { flex-wrap: wrap; align-items: center; }
+  #topbar h1 { width: auto; font-size: 14px; flex: 1; }
   .topbar-right { width: 100%; justify-content: flex-end; }
+  #mobile-refresh-btn { display: block !important; flex-shrink: 0; margin-left: 8px; font-size: 16px; }
 }
 .tb-btn { padding: 7px 11px; font-size: 12px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; min-height: 36px; display: flex; align-items: center; gap: 4px; }
 #refresh-btn { background: #2c5f3e; color: #fff; }
@@ -226,6 +228,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .person-card.dragging { opacity: 0.4; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
 .person-card.saving { opacity: 0.6; }
 .person-name { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 2px; }
+.person-type { font-size: 11px; font-weight: 500; color: #3a6fa8; margin-bottom: 3px; }
 .person-addr { font-size: 12px; color: #999; line-height: 1.4; }
 .view-on-map { font-size: 11px; color: #4a7c5e; margin-top: 4px; font-weight: 500; }
 .card-actions { display: flex; gap: 10px; margin-top: 6px; flex-wrap: nowrap; align-items: center; overflow: hidden; }
@@ -494,12 +497,15 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
         </select>
       </div>
       <div>
-        <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">District</label>
+        <label style="display:block;font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Type</label>
         <select id="add-district" style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#111;background:#fafaf8;outline:none;">
           <option value="">-- None --</option>
-          <option value="District 1">District 1</option>
-          <option value="District 2">District 2</option>
-          <option value="District 3">District 3</option>
+          <option value="Married (18-69)">Married (18-69)</option>
+          <option value="Youth (11–17)">Youth (11–17)</option>
+          <option value="YSA (18–35)">YSA (18–35)</option>
+          <option value="SA (36–45)">SA (36–45)</option>
+          <option value="SA (46–69)">SA (46–69)</option>
+          <option value="Seniors (70+)">Seniors (70+)</option>
         </select>
       </div>
     </div>
@@ -570,8 +576,12 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div>
       <h1 id="topbar-title">📍 Constitution Ward Map</h1>
     </div>
+    <button class="tb-btn" id="mobile-refresh-btn" onclick="refreshData()" style="display:none;background:transparent;border:1px solid #ddd;color:#555;padding:6px 10px;border-radius:8px;">↺</button>
     <div class="topbar-right">
-      <div id="stats"></div>
+      <div id="stats-stack">
+        <div id="stats"></div>
+        <div id="type-stats"></div>
+      </div>
       <div class="view-tabs">
         <button class="view-tab active" id="tab-map" onclick="switchView('map')">🗺 Map</button>
         <button class="view-tab" id="tab-board" onclick="switchView('board')">📋 Board</button>
@@ -605,18 +615,30 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
       </div>
     </div>
     <div id="district-panel">
-      <div class="fp-title">Districts</div>
-      <div class="filter-row" onclick="toggleDistrict('District 1')">
-        <div class="filter-cb checked dcb-blue" id="dcb-District_1">✓</div>
-        <div class="filter-label">District 1</div>
+      <div class="fp-title">Type</div>
+      <div class="filter-row" onclick="toggleType('Married (18-69)')">
+        <div class="filter-cb checked dcb-blue" id="dcb-Married_18-69">✓</div>
+        <div class="filter-label">Married (18-69)</div>
       </div>
-      <div class="filter-row" onclick="toggleDistrict('District 2')">
-        <div class="filter-cb checked dcb-blue" id="dcb-District_2">✓</div>
-        <div class="filter-label">District 2</div>
+      <div class="filter-row" onclick="toggleType('Youth (11–17)')">
+        <div class="filter-cb checked dcb-blue" id="dcb-Youth_11_17">✓</div>
+        <div class="filter-label">Youth (11–17)</div>
       </div>
-      <div class="filter-row" onclick="toggleDistrict('District 3')">
-        <div class="filter-cb checked dcb-blue" id="dcb-District_3">✓</div>
-        <div class="filter-label">District 3</div>
+      <div class="filter-row" onclick="toggleType('YSA (18–35)')">
+        <div class="filter-cb checked dcb-blue" id="dcb-YSA_18_35">✓</div>
+        <div class="filter-label">YSA (18–35)</div>
+      </div>
+      <div class="filter-row" onclick="toggleType('SA (36–45)')">
+        <div class="filter-cb checked dcb-blue" id="dcb-SA_36_45">✓</div>
+        <div class="filter-label">SA (36–45)</div>
+      </div>
+      <div class="filter-row" onclick="toggleType('SA (46–69)')">
+        <div class="filter-cb checked dcb-blue" id="dcb-SA_46_69">✓</div>
+        <div class="filter-label">SA (46–69)</div>
+      </div>
+      <div class="filter-row" onclick="toggleType('Seniors (70+)')">
+        <div class="filter-cb checked dcb-blue" id="dcb-Seniors_70">✓</div>
+        <div class="filter-label">Seniors (70+)</div>
       </div>
     </div>
   </div>
@@ -630,6 +652,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div id="map-view">
       <div id="map"></div>
       <div id="lasso-hint">✏️ Click to add points · Tap start point to close</div>
+      <button id="finish-shape-btn" onclick="finishShapeManually()" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:10;background:#2c5f3e;color:#fff;border:none;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.2);">✓ Finish Shape</button>
       <div id="selection-panel">
         <div id="sel-handle"></div>
         <div id="sel-header">
@@ -658,7 +681,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 
 <script>
 // ── Hardcoded credentials (edit these) ──
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzy8lO_ATx0YyqrEXqpki1P_-XyZ-OST85grEMx6TvxF85-PB-nCi8zkBIa33c2lgS1bQ/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx99soakmMoIwq1R0IBMv87y31pd0V2RRunY5kbbeTCNtlsYWcZ09hXKKujun5BfbB1/exec';
 const APP_MAPS_KEY   = 'AIzaSyA2s0JmpXwz8J768UY6ATAHwjJuAcveiA4';
 // Legacy USERS removed — now managed via getUsers() / saveUsers()
 const SK_SCRIPT='wardmap_script_url', SK_API='wardmap_api_key';
@@ -684,7 +707,7 @@ let allPeople=[],selectedPeople=[],lassoActive=false;
 let currentScriptUrl='',currentApiKey='';
 let statusColIndex=2; // default: column C (0-based index 2 = col 3)
 let visibleStatuses=new Set(['Active','Inactive','Less Active',"Don't Know"]);
-let visibleDistricts=new Set(['District 1','District 2','District 3','']);
+let visibleTypes=new Set(['Married (18-69)', 'Youth (11–17)', 'YSA (18–35)', 'SA (36–45)', 'SA (46–69)', 'Seniors (70+)', '']);
 let dragSrcPerson=null;
 
 // ── User Management ──
@@ -713,7 +736,7 @@ function saveUsers(users){
 async function loadUsers(){
   try{
     const cbName='__users_load_'+Date.now();
-    const url=`https://docs.google.com/spreadsheets/d/1P6mKsfULU7d4_1QAopJYmdowJRupJkfv94iZwS0RiyQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&sheet=Users`;
+    const url=`https://docs.google.com/spreadsheets/d/1hGmaP6mTdYcMfjaA6odFCTvkpPzWkCl1rdun6cevpsQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&sheet=Users`;
     const data=await new Promise((resolve,reject)=>{
       const timeout=setTimeout(()=>{delete window[cbName];s.remove();reject();},8000);
       window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
@@ -851,6 +874,8 @@ async function loadApp(){
       if(this._polyline){this._polyline.setMap(null);this._polyline=null;}
       if(this._firstMarker){this._firstMarker.setMap(null);this._firstMarker=null;}
       this._path=[];
+      const finishBtn=document.getElementById('finish-shape-btn');
+      if(finishBtn) finishBtn.style.display='none';
     },
     _finish: function() {
       if(this._path.length<3) return;
@@ -868,23 +893,28 @@ async function loadApp(){
     _nearFirst: function(latLng) {
       if(this._path.length<3) return false;
       const first=this._path[0];
-      // Use pixel-based distance via overlay projection
       try{
         const proj=map.getProjection();
         if(proj){
-          const scale=Math.pow(2,map.getZoom());
+          const zoom=map.getZoom();
+          const scale=Math.pow(2,zoom)*256; // world pixels at this zoom
           const p1=proj.fromLatLngToPoint(latLng);
           const p2=proj.fromLatLngToPoint(first);
-          const dx=(p1.x-p2.x)*scale;
-          const dy=(p1.y-p2.y)*scale;
-          return Math.sqrt(dx*dx+dy*dy)<40;
+          const dx=(p1.x-p2.x)*scale/256;
+          const dy=(p1.y-p2.y)*scale/256;
+          // proj.fromLatLngToPoint returns normalized [0,256] world coords
+          // multiply by 2^zoom to get actual pixel distance at current zoom
+          const px=(p1.x-p2.x)*Math.pow(2,zoom);
+          const py=(p1.y-p2.y)*Math.pow(2,zoom);
+          const distPx=Math.sqrt(px*px+py*py);
+          return distPx<44; // ~44px tap target, mobile-friendly
         }
       }catch(e){}
-      // Fallback: degree-based threshold
+      // Fallback: degree-based threshold (rough, zoom-scaled)
       const dlat=Math.abs(latLng.lat()-first.lat());
       const dlng=Math.abs(latLng.lng()-first.lng());
       const zoom=map.getZoom()||15;
-      const thresh=0.002/Math.pow(2,zoom-13);
+      const thresh=0.01/Math.pow(2,zoom-10);
       return dlat<thresh && dlng<thresh;
     },
     startDrawing: function() {
@@ -900,6 +930,9 @@ async function loadApp(){
           self._finish(); return;
         }
         self._path.push(e.latLng);
+        // Show "Finish Shape" button once we have enough points to close
+        const finishBtn=document.getElementById('finish-shape-btn');
+        if(finishBtn) finishBtn.style.display = self._path.length>=3 ? 'block' : 'none';
         // Show a dot on the first point after 3 points so user knows where to close
         if(self._path.length===1){
           self._firstMarker=new google.maps.Marker({
@@ -976,7 +1009,7 @@ async function fetchData(){
   const col=n=>headers.indexOf(n);
   const iName=col('name')>=0?col('name'):col('member name'),iStatus=col('status'),iAddr=col('address');
   const iApt=col('apt/unit')>=0?col('apt/unit'):col('apt')>=0?col('apt'):col('unit');
-  const iCity=col('city'),iState=col('state'),iZip=col('zip'),iDistrict=col('district');
+  const iCity=col('city'),iState=col('state'),iZip=col('zip'),iType=col('type');
   if(iName<0||iStatus<0||iAddr<0){showError('Missing columns. Row 1 must have: Name | Status | Address\n\nFound: '+headers.join(', '));return;}
   statusColIndex=iStatus+1;
   const data=rows.slice(1).filter(r=>r.some(c=>String(c||'').trim()));
@@ -1000,8 +1033,8 @@ async function fetchData(){
     if(state)fullAddr+=', '+state;
     if(zip)fullAddr+=' '+zip;
     const cfg=getStatusConfig(status);
-    const district=iDistrict>=0?String(row[iDistrict]||'').trim():'';
-    return {name,fullAddr,label:cfg.label,color:cfg.color,rowIndex:i+2,needsGeocode:!cache[fullAddr],district};
+    const type=iType>=0?String(row[iType]||'').trim():'';
+    return {name,fullAddr,label:cfg.label,color:cfg.color,rowIndex:i+2,needsGeocode:!cache[fullAddr],type};
   }).filter(Boolean);
 
   const uncachedCount=parsed.filter(p=>p.needsGeocode).length;
@@ -1009,7 +1042,7 @@ async function fetchData(){
 
   // Helper to create a marker
   function createMarker(latLng, p){
-    const {name,color,label,fullAddr,district}=p;
+    const {name,color,label,fullAddr,type}=p;
     const coordKey=latLng.lat().toFixed(6)+','+latLng.lng().toFixed(6);
     if(!coordCount[coordKey])coordCount[coordKey]=0;
     const offset=coordCount[coordKey];
@@ -1020,12 +1053,13 @@ async function fetchData(){
     const marker=new google.maps.Marker({
       position:displayPos,map,title:name,
       icon:{url:makePinSvg(color),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)},
-      visible:visibleStatuses.has(label)&&(visibleDistricts.has(district||'')||!district)
+      visible:visibleStatuses.has(label)&&(visibleTypes.has(type||'')||!type)
     });
     marker.addListener('click',()=>{
       const pidx=allPeople.findIndex(x=>x.name===name&&x.fullAddr===fullAddr);
       infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:180px">
-        <div style="font-weight:600;font-size:14px;margin-bottom:5px">${esc(name)}</div>
+        <div style="font-weight:600;font-size:14px;margin-bottom:3px">${esc(name)}</div>
+        ${type?`<div style="font-size:11px;font-weight:500;color:#3a6fa8;margin-bottom:5px">${esc(type)}</div>`:''}
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
           <span style="background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${esc(label)}</span>
           <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#4a7c5e;font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">✎ Edit</button>
@@ -1043,10 +1077,12 @@ async function fetchData(){
   bounds=new google.maps.LatLngBounds();
 
   // Pre-fill allPeople and markers arrays with nulls so indices align
+  const typeStats={};
   for(let i=0;i<parsed.length;i++){
     const p=parsed[i];
     stats[p.label]=(stats[p.label]||0)+1;
-    allPeople.push({name:p.name,fullAddr:p.fullAddr,label:p.label,color:p.color,latLng:null,rowIndex:p.rowIndex,district:p.district});
+    if(p.type) typeStats[p.type]=(typeStats[p.type]||0)+1;
+    allPeople.push({name:p.name,fullAddr:p.fullAddr,label:p.label,color:p.color,latLng:null,rowIndex:p.rowIndex,type:p.type});
     markers.push(null);
   }
 
@@ -1070,6 +1106,12 @@ async function fetchData(){
     </div>`).join('');
   document.getElementById('stats').innerHTML=statHtml;
   document.getElementById('mobile-stats').innerHTML=statHtml;
+  const TYPE_ORDER=['Married (18-69)','Youth (11–17)','YSA (18–35)','SA (36–45)','SA (46–69)','Seniors (70+)'];
+  const typeStatHtml=TYPE_ORDER.filter(t=>typeStats[t]).map(t=>
+    `<div class="stat-pill" style="background:#3a6fa818;color:#3a6fa8">
+      <div class="stat-dot" style="background:#3a6fa8"></div>${typeStats[t]} ${t}
+    </div>`).join('');
+  document.getElementById('type-stats').innerHTML=typeStatHtml;
   renderBoard(allPeople);
   hideLoading();
   // Load notes in background, then update counters and re-render board
@@ -1129,15 +1171,23 @@ function toggleFilter(label){
   applyVisibility();
 }
 
-function toggleDistrict(label){
-  const key=label.replace(/ /g,'_');
-  if(visibleDistricts.has(label)){
-    visibleDistricts.delete(label);
-    const cb=document.getElementById('dcb-'+key);
+const TYPE_ID_MAP = {
+  'Married (18-69)':'dcb-Married_18-69',
+  'Youth (11–17)':'dcb-Youth_11_17',
+  'YSA (18–35)':'dcb-YSA_18_35',
+  'SA (36–45)':'dcb-SA_36_45',
+  'SA (46–69)':'dcb-SA_46_69',
+  'Seniors (70+)':'dcb-Seniors_70'
+};
+function toggleType(label){
+  const cbId=TYPE_ID_MAP[label];
+  if(visibleTypes.has(label)){
+    visibleTypes.delete(label);
+    const cb=document.getElementById(cbId);
     if(cb){cb.classList.remove('checked');cb.classList.add('unchecked');cb.textContent='';}
   } else {
-    visibleDistricts.add(label);
-    const cb=document.getElementById('dcb-'+key);
+    visibleTypes.add(label);
+    const cb=document.getElementById(cbId);
     if(cb){cb.classList.add('checked');cb.classList.remove('unchecked');cb.textContent='✓';}
   }
   applyVisibility();
@@ -1154,7 +1204,7 @@ async function loadNotes(forceRefresh=false){
   if(notesLoaded && !forceRefresh) return;
   try{
     const cbName='__notes_load_'+Date.now();
-    const url=`https://docs.google.com/spreadsheets/d/1P6mKsfULU7d4_1QAopJYmdowJRupJkfv94iZwS0RiyQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&gid=${NOTES_SHEET_GID}`;
+    const url=`https://docs.google.com/spreadsheets/d/1hGmaP6mTdYcMfjaA6odFCTvkpPzWkCl1rdun6cevpsQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&gid=${NOTES_SHEET_GID}`;
     const data=await new Promise((resolve,reject)=>{
       const timeout=setTimeout(()=>{delete window[cbName];s.remove();reject(new Error('timeout'));},8000);
       window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
@@ -1496,8 +1546,8 @@ async function saveUserForm(){
 function applyVisibility(){
   allPeople.forEach((p,i)=>{
     const m=markers[i];
-    const districtKey=p.district||'';
-    if(m)m.setVisible(visibleStatuses.has(p.label)&&(visibleDistricts.has(districtKey)||!districtKey));
+    const typeKey=p.type||'';
+    if(m)m.setVisible(visibleStatuses.has(p.label)&&(visibleTypes.has(typeKey)||!typeKey));
   });
 }
 
@@ -1579,6 +1629,7 @@ function renderBoard(people){
       card.draggable=true;
       card.innerHTML=`
         <div class="person-name">${esc(p.name)}</div>
+        ${p.type?`<div class="person-type">${esc(p.type)}</div>`:''}
         <div class="person-addr">${esc(p.fullAddr)}</div>
         <div class="card-actions">
           ${p.latLng?`<span class="card-action-link view-map-link">↗ View</span>`:''}
@@ -1637,7 +1688,7 @@ function showEditMenu(person, x, y){
     <div class="edit-menu-title">✎ Edit "${esc(person.name)}"</div>
     <div class="edit-menu-sep"></div>
     <div class="edit-menu-item" onclick="openEditModal('status')">🔄 Change status</div>
-    <div class="edit-menu-item" onclick="openEditModal('district')">📍 Change district</div>
+    <div class="edit-menu-item" onclick="openEditModal('type')">📍 Change type</div>
     <div class="edit-menu-item" onclick="openEditModal('name')">👤 Edit name</div>
     <div class="edit-menu-item" onclick="openEditModal('address')">🏠 Edit address</div>
     <div class="edit-menu-sep"></div>
@@ -1683,16 +1734,15 @@ function openEditModal(mode){
       </div>`;
     saveBtn.textContent = 'Save';
     saveBtn.style.background = '#2c5f3e';
-  } else if(mode === 'district'){
-    title.textContent = 'Change District';
+  } else if(mode === 'type'){
+    title.textContent = 'Change Type';
+    const TYPES=['Married (18-69)','Youth (11–17)','YSA (18–35)','SA (36–45)','SA (46–69)','Seniors (70+)'];
     body.innerHTML = `
       <div class="edit-modal-field">
-        <label>District</label>
-        <select id="em-district">
+        <label>Type</label>
+        <select id="em-type">
           <option value="">-- None --</option>
-          <option value="District 1" ${p.district==='District 1'?'selected':''}>District 1</option>
-          <option value="District 2" ${p.district==='District 2'?'selected':''}>District 2</option>
-          <option value="District 3" ${p.district==='District 3'?'selected':''}>District 3</option>
+          ${TYPES.map(t=>`<option value="${t}" ${p.type===t?'selected':''}>${t}</option>`).join('')}
         </select>
       </div>`;
     saveBtn.textContent = 'Save';
@@ -1740,15 +1790,15 @@ async function saveEdit(){
     closeEditModal();
     await updatePersonStatus(p, newLabel);
 
-  } else if(currentEditMode === 'district'){
-    const newDistrict = document.getElementById('em-district').value;
+  } else if(currentEditMode === 'type'){
+    const newType = document.getElementById('em-type').value;
     closeEditModal();
-    const districtColIndex = 9; // column I = 9
-    await updateSheetCell(p.rowIndex, districtColIndex, newDistrict, ()=>{
-      p.district = newDistrict;
+    const typeColIndex = 8; // column H = 8
+    await updateSheetCell(p.rowIndex, typeColIndex, newType, ()=>{
+      p.type = newType;
       applyVisibility();
       renderBoard(allPeople);
-      showToast('✅ District updated!');
+      showToast('✅ Type updated!');
     });
 
   } else if(currentEditMode === 'name'){
@@ -1848,7 +1898,7 @@ async function saveNewRecord(){
   const state   = document.getElementById('add-state').value.trim();
   const zip     = document.getElementById('add-zip').value.trim();
   const status  = document.getElementById('add-status').value;
-  const district= document.getElementById('add-district').value;
+  const type    = document.getElementById('add-district').value;
   const errEl   = document.getElementById('add-error');
 
   if(!name){ errEl.textContent='Name is required.'; errEl.style.display='block'; return; }
@@ -1866,9 +1916,9 @@ async function saveNewRecord(){
   saveBtn.textContent = 'Saving…';
   saveBtn.disabled = true;
 
-  // Save to sheet via Apps Script
+  // Save to sheet via Apps Script — columns: Member Name|Address|Apt/Unit|City|State|Zip Code|Status|Type
   const cbName = '__wardmap_add_' + Date.now();
-  const params = encodeURIComponent(JSON.stringify([name, address, apt, city, state, zip, status, '', '', district]));
+  const params = encodeURIComponent(JSON.stringify([name, address, apt, city, state, zip, status, type]));
   const url = currentScriptUrl + '?action=addrow&data=' + params + '&callback=' + cbName;
 
   const result = await new Promise(resolve => {
@@ -1898,7 +1948,7 @@ async function saveNewRecord(){
   try { latLng = await geocodeAddress(fullAddr); } catch(e){}
 
   const newRowIndex = result.rowIndex;
-  const newPerson = {name, fullAddr, label:cfg.label, color:cfg.color, latLng, rowIndex:newRowIndex, district};
+  const newPerson = {name, fullAddr, label:cfg.label, color:cfg.color, latLng, rowIndex:newRowIndex, type};
   allPeople.push(newPerson);
 
   if(latLng){
@@ -1938,6 +1988,12 @@ function setLassoOff(){
   document.getElementById('lasso-hint').style.display='none';
 }
 
+function finishShapeManually(){
+  if(drawingManager && drawingManager._active){
+    drawingManager._finish();
+  }
+}
+
 function toggleLasso(){
   if(!map)return;
   lassoActive=!lassoActive;
@@ -1958,8 +2014,8 @@ function toggleLasso(){
 function computeSelection(polygon){
   // Only select pins that are currently visible (match active filters)
   selectedPeople=allPeople.filter(p=>{
-    const dk=p.district||'';
-    return p.latLng&&visibleStatuses.has(p.label)&&(visibleDistricts.has(dk)||!dk)&&google.maps.geometry.poly.containsLocation(p.latLng,polygon);
+    const tk=p.type||'';
+    return p.latLng&&visibleStatuses.has(p.label)&&(visibleTypes.has(tk)||!tk)&&google.maps.geometry.poly.containsLocation(p.latLng,polygon);
   });
   renderSelectionPanel();
 }
@@ -1973,6 +2029,7 @@ function renderSelectionPanel(){
   list.innerHTML=selectedPeople.map(p=>`
     <div class="sel-item">
       <div class="sel-item-name">${esc(p.name)}</div>
+      ${p.type?`<div style="font-size:11px;font-weight:500;color:#3a6fa8;margin-bottom:2px">${esc(p.type)}</div>`:''}
       <div class="sel-item-addr">${esc(p.fullAddr)}</div>
       <span class="sel-item-status" style="background:${p.color}18;color:${p.color}">${esc(p.label)}</span>
     </div>`).join('');
