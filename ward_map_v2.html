@@ -64,9 +64,10 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 @media (max-width: 639px) {
   .view-tabs { display: none; }
   #stats-stack { display: none !important; }
-  #topbar { flex-wrap: wrap; }
-  #topbar h1 { width: 100%; font-size: 14px; }
+  #topbar { flex-wrap: wrap; align-items: center; }
+  #topbar h1 { width: auto; font-size: 14px; flex: 1; }
   .topbar-right { width: 100%; justify-content: flex-end; }
+  #mobile-refresh-btn { display: block !important; flex-shrink: 0; margin-left: 8px; font-size: 16px; }
 }
 .tb-btn { padding: 7px 11px; font-size: 12px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; min-height: 36px; display: flex; align-items: center; gap: 4px; }
 #refresh-btn { background: #2c5f3e; color: #fff; }
@@ -575,6 +576,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div>
       <h1 id="topbar-title">📍 Constitution Ward Map</h1>
     </div>
+    <button class="tb-btn" id="mobile-refresh-btn" onclick="refreshData()" style="display:none;background:transparent;border:1px solid #ddd;color:#555;padding:6px 10px;border-radius:8px;">↺</button>
     <div class="topbar-right">
       <div id="stats-stack">
         <div id="stats"></div>
