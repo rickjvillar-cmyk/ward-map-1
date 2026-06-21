@@ -646,6 +646,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
     <div id="map-view">
       <div id="map"></div>
       <div id="lasso-hint">✏️ Click to add points · Tap start point to close</div>
+      <button id="finish-shape-btn" onclick="finishShapeManually()" style="display:none;position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:10;background:#2c5f3e;color:#fff;border:none;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.2);">✓ Finish Shape</button>
       <div id="selection-panel">
         <div id="sel-handle"></div>
         <div id="sel-header">
@@ -867,6 +868,8 @@ async function loadApp(){
       if(this._polyline){this._polyline.setMap(null);this._polyline=null;}
       if(this._firstMarker){this._firstMarker.setMap(null);this._firstMarker=null;}
       this._path=[];
+      const finishBtn=document.getElementById('finish-shape-btn');
+      if(finishBtn) finishBtn.style.display='none';
     },
     _finish: function() {
       if(this._path.length<3) return;
@@ -884,23 +887,28 @@ async function loadApp(){
     _nearFirst: function(latLng) {
       if(this._path.length<3) return false;
       const first=this._path[0];
-      // Use pixel-based distance via overlay projection
       try{
         const proj=map.getProjection();
         if(proj){
-          const scale=Math.pow(2,map.getZoom());
+          const zoom=map.getZoom();
+          const scale=Math.pow(2,zoom)*256; // world pixels at this zoom
           const p1=proj.fromLatLngToPoint(latLng);
           const p2=proj.fromLatLngToPoint(first);
-          const dx=(p1.x-p2.x)*scale;
-          const dy=(p1.y-p2.y)*scale;
-          return Math.sqrt(dx*dx+dy*dy)<40;
+          const dx=(p1.x-p2.x)*scale/256;
+          const dy=(p1.y-p2.y)*scale/256;
+          // proj.fromLatLngToPoint returns normalized [0,256] world coords
+          // multiply by 2^zoom to get actual pixel distance at current zoom
+          const px=(p1.x-p2.x)*Math.pow(2,zoom);
+          const py=(p1.y-p2.y)*Math.pow(2,zoom);
+          const distPx=Math.sqrt(px*px+py*py);
+          return distPx<44; // ~44px tap target, mobile-friendly
         }
       }catch(e){}
-      // Fallback: degree-based threshold
+      // Fallback: degree-based threshold (rough, zoom-scaled)
       const dlat=Math.abs(latLng.lat()-first.lat());
       const dlng=Math.abs(latLng.lng()-first.lng());
       const zoom=map.getZoom()||15;
-      const thresh=0.002/Math.pow(2,zoom-13);
+      const thresh=0.01/Math.pow(2,zoom-10);
       return dlat<thresh && dlng<thresh;
     },
     startDrawing: function() {
@@ -916,6 +924,9 @@ async function loadApp(){
           self._finish(); return;
         }
         self._path.push(e.latLng);
+        // Show "Finish Shape" button once we have enough points to close
+        const finishBtn=document.getElementById('finish-shape-btn');
+        if(finishBtn) finishBtn.style.display = self._path.length>=3 ? 'block' : 'none';
         // Show a dot on the first point after 3 points so user knows where to close
         if(self._path.length===1){
           self._firstMarker=new google.maps.Marker({
@@ -1961,6 +1972,12 @@ function setLassoOff(){
   document.getElementById('lasso-btn').innerHTML='✏️ <span class="lasso-label">Select</span>';
   document.getElementById('nav-select').classList.remove('active');
   document.getElementById('lasso-hint').style.display='none';
+}
+
+function finishShapeManually(){
+  if(drawingManager && drawingManager._active){
+    drawingManager._finish();
+  }
 }
 
 function toggleLasso(){
