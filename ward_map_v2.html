@@ -226,6 +226,7 @@ body { font-family: 'DM Sans', sans-serif; background: #f5f4f0; color: #1a1a1a; 
 .person-card.dragging { opacity: 0.4; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
 .person-card.saving { opacity: 0.6; }
 .person-name { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 2px; }
+.person-type { font-size: 11px; font-weight: 500; color: #3a6fa8; margin-bottom: 3px; }
 .person-addr { font-size: 12px; color: #999; line-height: 1.4; }
 .view-on-map { font-size: 11px; color: #4a7c5e; margin-top: 4px; font-weight: 500; }
 .card-actions { display: flex; gap: 10px; margin-top: 6px; flex-wrap: nowrap; align-items: center; overflow: hidden; }
@@ -1040,7 +1041,8 @@ async function fetchData(){
     marker.addListener('click',()=>{
       const pidx=allPeople.findIndex(x=>x.name===name&&x.fullAddr===fullAddr);
       infoWindow.setContent(`<div style="font-family:'DM Sans',sans-serif;padding:4px 2px;min-width:180px">
-        <div style="font-weight:600;font-size:14px;margin-bottom:5px">${esc(name)}</div>
+        <div style="font-weight:600;font-size:14px;margin-bottom:3px">${esc(name)}</div>
+        ${type?`<div style="font-size:11px;font-weight:500;color:#3a6fa8;margin-bottom:5px">${esc(type)}</div>`:''}
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
           <span style="background:${color}22;color:${color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px">${esc(label)}</span>
           <button onclick="showEditMenuFromMap(${pidx !== -1 ? pidx : 0})" style="background:none;border:none;color:#4a7c5e;font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif">✎ Edit</button>
@@ -1602,6 +1604,7 @@ function renderBoard(people){
       card.draggable=true;
       card.innerHTML=`
         <div class="person-name">${esc(p.name)}</div>
+        ${p.type?`<div class="person-type">${esc(p.type)}</div>`:''}
         <div class="person-addr">${esc(p.fullAddr)}</div>
         <div class="card-actions">
           ${p.latLng?`<span class="card-action-link view-map-link">↗ View</span>`:''}
