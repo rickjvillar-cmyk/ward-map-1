@@ -1204,7 +1204,7 @@ async function loadNotes(forceRefresh=false){
   if(notesLoaded && !forceRefresh) return;
   try{
     const cbName='__notes_load_'+Date.now();
-    const url=`https://docs.google.com/spreadsheets/d/1hGmaP6mTdYcMfjaA6odFCTvkpPzWkCl1rdun6cevpsQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&gid=${NOTES_SHEET_GID}`;
+    const url=`https://docs.google.com/spreadsheets/d/1hGmaP6mTdYcMfjaA6odFCTvkpPzWkCl1rdun6cevpsQ/gviz/tq?tqx=out:json;responseHandler:${cbName}&sheet=Notes`;
     const data=await new Promise((resolve,reject)=>{
       const timeout=setTimeout(()=>{delete window[cbName];s.remove();reject(new Error('timeout'));},8000);
       window[cbName]=(d)=>{clearTimeout(timeout);delete window[cbName];s.remove();resolve(d);};
