@@ -1345,7 +1345,15 @@ async function submitNote(){
     if(result.success){
       if(!notesCache[contact]) notesCache[contact]=[];
       notesCache[contact].push({noteId:String(result.rowIndex),text,author,authorName,timestamp,rowIndex:result.rowIndex});
-      hideNoteCompose(); renderNotesPanel(contact); renderNoteCounters(); showToast('✅ Note saved!');
+      hideNoteCompose();
+      renderNotesPanel(contact);
+      renderNoteCounters();
+      showToast('✅ Note saved!');
+      // Also reload from sheet to ensure consistency
+      loadNotes(true).then(()=>{
+        renderNotesPanel(contact);
+        renderNoteCounters();
+      });
     } else { showToast('❌ Failed to save note',true); }
   }
 }
